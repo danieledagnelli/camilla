@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: true
+OpenIDE-Module: net.bidimensional.camilla
+OpenIDE-Module-Localizing-Bundle: net/bidimensional/camilla/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+
