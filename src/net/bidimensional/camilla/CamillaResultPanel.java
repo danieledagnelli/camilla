@@ -681,12 +681,12 @@ public class CamillaResultPanel extends javax.swing.JPanel implements DataResult
         setMinimumSize(new java.awt.Dimension(0, 5));
         setPreferredSize(new java.awt.Dimension(5, 5));
 
-//        org.openide.awt.Mnemonics.setLocalizedText(descriptionLabel, org.openide.util.NbBundle.getMessage(CamillaResultPanel.class, "DataResultPanel.descriptionLabel.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(descriptionLabel, org.openide.util.NbBundle.getMessage(CamillaResultPanel.class, "DataResultPanel.descriptionLabel.text")); // NOI18N
         descriptionLabel.setMinimumSize(new java.awt.Dimension(5, 14));
 
-//        org.openide.awt.Mnemonics.setLocalizedText(numberOfChildNodesLabel, org.openide.util.NbBundle.getMessage(CamillaResultPanel.class, "DataResultPanel.numberOfChildNodesLabel.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(numberOfChildNodesLabel, org.openide.util.NbBundle.getMessage(CamillaResultPanel.class, "DataResultPanel.numberOfChildNodesLabel.text")); // NOI18N
 
-//        org.openide.awt.Mnemonics.setLocalizedText(matchLabel, org.openide.util.NbBundle.getMessage(CamillaResultPanel.class, "DataResultPanel.matchLabel.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(matchLabel, org.openide.util.NbBundle.getMessage(CamillaResultPanel.class, "DataResultPanel.matchLabel.text")); // NOI18N
 
         resultViewerTabs.setMinimumSize(new java.awt.Dimension(0, 5));
 

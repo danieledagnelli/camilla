@@ -3,7 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package net.bidimensional.camilla;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -16,7 +15,7 @@ import org.openide.nodes.Node;
 import org.openide.util.NbPreferences;
 import org.sleuthkit.autopsy.corecomponents.DataResultViewerTable;
 import org.sleuthkit.autopsy.corecomponents.TableFilterNode;
- 
+
 final class ResultViewerPersistence {
 
     private ResultViewerPersistence() {
