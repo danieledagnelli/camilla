@@ -52,6 +52,7 @@ public class CamillaOutlineView extends OutlineView {
             this.node = node;
         }
 
+        @Override
         public Object getTransferData(DataFlavor flavor) {
             if (isDataFlavorSupported(flavor)) {
                 return node;
@@ -60,10 +61,12 @@ public class CamillaOutlineView extends OutlineView {
             }
         }
 
+        @Override
         public DataFlavor[] getTransferDataFlavors() {
             return new DataFlavor[]{new DataFlavor(Node.class, "Node")};
         }
 
+        @Override
         public boolean isDataFlavorSupported(DataFlavor flavor) {
             return flavor.equals(getTransferDataFlavors()[0]);
         }

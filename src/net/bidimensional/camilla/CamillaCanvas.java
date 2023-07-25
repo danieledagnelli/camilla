@@ -32,12 +32,20 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
+import org.sleuthkit.autopsy.casemodule.Case;
+import org.sleuthkit.datamodel.BlackboardArtifact;
+import org.sleuthkit.datamodel.SleuthkitCase;
 
 public class CamillaCanvas extends JPanel {
 
     private mxGraph graph;
     private Object parent;
     private mxGraphComponent graphComponent;
+    private Case currentCase;
+    private SleuthkitCase skCase;
+    private BlackboardArtifact.Type vertexArtifactType;
+    private BlackboardArtifact.Type edgesArtifactType;
+    private BlackboardArtifact artifact;
 
     public mxGraph getGraph() {
         return graph;
@@ -46,8 +54,24 @@ public class CamillaCanvas extends JPanel {
     public CamillaCanvas() {
         super();
         setLayout(new BorderLayout());  // Set the layout to BorderLayout
+        
+        currentCase = Case.getCurrentCase();
+        skCase = currentCase.getSleuthkitCase();
 
-        graph = new mxGraph();
+        graph = new mxGraph() {
+            @Override
+            public boolean isCellMovable(Object cell) {
+                if (cell instanceof mxCell) {
+                    mxCell mxCell = (mxCell) cell;
+                    // Add your conditions here based on the mxCell object
+                    // For example, to make a specific vertex immovable, you could do:
+                    // if (mxCell.getValue().equals("My Vertex")) return false;
+                }
+//                return super.isCellMovable(cell);
+                return true;
+            }
+        };
+
         graph.setCellsMovable(true);
         parent = graph.getDefaultParent();
 
@@ -78,7 +102,7 @@ public class CamillaCanvas extends JPanel {
                             try {
                                 File imageFile = new File(saveImageToTempFile(node));
                                 String imageUrl = imageFile.toURI().toURL().toString();
-                                String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1";
+                                String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
 
                                 graph.insertVertex(graph.getDefaultParent(), null, node.getDisplayName(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
 

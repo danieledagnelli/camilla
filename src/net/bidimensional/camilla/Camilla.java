@@ -21,14 +21,12 @@ import org.sleuthkit.autopsy.datamodel.BaseChildFactory.PageChangeEvent;
 import org.sleuthkit.autopsy.datamodel.BaseChildFactory.PageCountChangeEvent;
 import org.sleuthkit.autopsy.datamodel.BaseChildFactory.PageSizeChangeEvent;
 import org.sleuthkit.datamodel.Score.Significance;
-
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Point;
+import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragSource;
 import java.awt.event.MouseAdapter;
@@ -63,7 +61,6 @@ import javax.swing.ListSelectionModel;
 import static javax.swing.SwingConstants.CENTER;
 import static javax.swing.SwingConstants.LEFT;
 import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
@@ -87,10 +84,13 @@ import org.openide.nodes.NodeListener;
 import org.openide.nodes.NodeMemberEvent;
 import org.openide.nodes.NodeReorderEvent;
 import org.openide.util.NbBundle;
+import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.autopsy.corecomponents.AbstractDataResultViewer;
 import org.sleuthkit.autopsy.corecomponents.DataResultViewerTable;
 import org.sleuthkit.autopsy.corecomponents.TableFilterNode;
 import org.sleuthkit.autopsy.coreutils.MessageNotifyUtil;
+import org.sleuthkit.datamodel.BlackboardArtifact;
+import org.sleuthkit.datamodel.SleuthkitCase;
 
 /**
  * A tabular result viewer that displays the children of the given root node
@@ -145,6 +145,11 @@ public class Camilla extends AbstractDataResultViewer {
     private final TableListener outlineViewListener;
     private final IconRendererTableListener iconRendererListener;
     private Node rootNode;
+
+    
+    
+    
+    
     /**
      * Multiple nodes may have been visited in the context of this
      * DataResultViewerTable. We keep track of the page state for these nodes in
@@ -1450,7 +1455,16 @@ public class Camilla extends AbstractDataResultViewer {
             }
         });
 
-        exportCSVButton.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "CamillaViewerTable.exportCSVButton.text")); // NOI18N
+        // Load the original image
+        ImageIcon originalIcon = new ImageIcon(getClass().getResource("download-flat.png"));
+// Create a new image scaled to 16x16 pixels
+        Image scaledImage = originalIcon.getImage().getScaledInstance(24, 24, Image.SCALE_DEFAULT);
+// Create a new ImageIcon from the scaled image
+        ImageIcon buttonIcon = new ImageIcon(scaledImage);
+// Set the icon of the button and the tooltip text
+        exportCSVButton.setIcon(buttonIcon);
+        exportCSVButton.setText(""); // remove the existing text
+        exportCSVButton.setToolTipText(org.openide.util.NbBundle.getMessage(Camilla.class, "CamillaViewerTable.exportPNGButton.text"));
         exportCSVButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveGraphToPNG(evt);
@@ -1540,7 +1554,7 @@ public class Camilla extends AbstractDataResultViewer {
     }
 
     public void saveGraphToPNG(java.awt.event.ActionEvent evt) {
-        mxGraphComponent graphComponent = ((CamillaCanvas)canvasPanel).getGraphComponent();
+        mxGraphComponent graphComponent = ((CamillaCanvas) canvasPanel).getGraphComponent();
         // Create a BufferedImage of the graph
         BufferedImage image = mxCellRenderer.createBufferedImage(graphComponent.getGraph(), null, 1, Color.WHITE, true, null);
 
