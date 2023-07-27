@@ -95,6 +95,10 @@
                 <binary-origin>release/modules/ext/javafx-swt.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
+                <runtime-relative-path>ext/sqlite-jdbc-3.42.0.0.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/sqlite-jdbc-3.42.0.0.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/javafx.graphics.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/javafx.graphics.jar</binary-origin>
             </class-path-extension>

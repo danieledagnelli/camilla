@@ -1,13 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package net.bidimensional.camilla;
 
+import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxGraph;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Point;
@@ -22,6 +19,11 @@ import java.beans.BeanInfo;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import javax.imageio.ImageIO;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -33,8 +35,14 @@ import javax.swing.TransferHandler;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.sleuthkit.autopsy.casemodule.Case;
+import org.sleuthkit.autopsy.casemodule.NoCurrentCaseException;
 import org.sleuthkit.datamodel.BlackboardArtifact;
+import org.sleuthkit.datamodel.BlackboardAttribute;
+import org.sleuthkit.datamodel.Content;
 import org.sleuthkit.datamodel.SleuthkitCase;
+import org.sleuthkit.datamodel.TskCoreException;
+import org.sleuthkit.datamodel.TskDataException;
+import org.w3c.dom.Document;
 
 public class CamillaCanvas extends JPanel {
 
@@ -43,9 +51,11 @@ public class CamillaCanvas extends JPanel {
     private mxGraphComponent graphComponent;
     private Case currentCase;
     private SleuthkitCase skCase;
-    private BlackboardArtifact.Type vertexArtifactType;
-    private BlackboardArtifact.Type edgesArtifactType;
-    private BlackboardArtifact artifact;
+    private BlackboardArtifact.Type graphType;
+    private Content dataSource;
+    private mxCodec codec;
+    private String graphXml;
+    BlackboardArtifact artifact;
 
     public mxGraph getGraph() {
         return graph;
@@ -54,24 +64,41 @@ public class CamillaCanvas extends JPanel {
     public CamillaCanvas() {
         super();
         setLayout(new BorderLayout());  // Set the layout to BorderLayout
-        
+
         currentCase = Case.getCurrentCase();
         skCase = currentCase.getSleuthkitCase();
+        try {
+//            TODO: FIX
+            graphType = currentCase.getSleuthkitCase().addBlackboardArtifactType("TSK_GRAPH", "Graph");
 
-        graph = new mxGraph() {
-            @Override
-            public boolean isCellMovable(Object cell) {
-                if (cell instanceof mxCell) {
-                    mxCell mxCell = (mxCell) cell;
-                    // Add your conditions here based on the mxCell object
-                    // For example, to make a specific vertex immovable, you could do:
-                    // if (mxCell.getValue().equals("My Vertex")) return false;
-                }
+            dataSource = currentCase.getDataSources().get(0);  // Assuming you have only one data source
+            artifact = dataSource.newArtifact(graphType.getTypeID());
+
+        } catch (TskCoreException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (TskDataException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
+        codec = new mxCodec();
+
+        graph = loadGraph();
+
+        if (graph == null) {
+            graph = new mxGraph() {
+                @Override
+                public boolean isCellMovable(Object cell) {
+                    if (cell instanceof mxCell) {
+                        mxCell mxCell = (mxCell) cell;
+                        // Add your conditions here based on the mxCell object
+                        // For example, to make a specific vertex immovable, you could do:
+                        // if (mxCell.getValue().equals("My Vertex")) return false;
+                    }
 //                return super.isCellMovable(cell);
-                return true;
-            }
-        };
-
+                    return true;
+                }
+            };
+        }
         graph.setCellsMovable(true);
         parent = graph.getDefaultParent();
 
@@ -103,7 +130,10 @@ public class CamillaCanvas extends JPanel {
                                 File imageFile = new File(saveImageToTempFile(node));
                                 String imageUrl = imageFile.toURI().toURL().toString();
                                 String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
+                                graphXml = mxXmlUtils.getXml(codec.encode(graph.getModel()));
 
+//                                System.out.println(CamillaUtils.getResponseFromGpt4(graphXml));
+                                saveGraphXml(graphXml);
                                 graph.insertVertex(graph.getDefaultParent(), null, node.getDisplayName(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
 
                             } finally {
@@ -164,6 +194,76 @@ public class CamillaCanvas extends JPanel {
         this.setBackground(Color.BLACK); // Set the panel background to black
         this.setAutoscrolls(true);
         this.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+    }
+
+    private mxGraph loadGraph() {
+        // Get the current case
+        Case currentCase;
+        try {
+            currentCase = Case.getCurrentCaseThrows();
+        } catch (NoCurrentCaseException e) {
+            System.err.println("No current case: " + e.getMessage());
+            return null;
+        }
+
+        // Get the case directory path and append the relative path to the autopsy.db
+        String caseDatabasePath = currentCase.getCaseDirectory();
+        String autopsyDbPath = caseDatabasePath + "\\autopsy.db";
+
+        String url = "jdbc:sqlite:" + autopsyDbPath;
+        try ( Connection conn = DriverManager.getConnection(url)) {
+            if (conn != null) {
+                Statement stmt = conn.createStatement();
+
+                // Replace '1' with the ID used to save the graphXml
+                ResultSet resultSet = stmt.executeQuery("SELECT graphXml FROM graphXmlData WHERE id = 1");
+
+                if (resultSet.next()) {
+                    String graphXml = resultSet.getString("graphXml");
+
+                    Document document = mxXmlUtils.parseXml(graphXml);
+                    mxCodec codec = new mxCodec(document);
+                    mxGraph graph = new mxGraph();
+                    codec.decode(document.getDocumentElement(), graph.getModel());
+
+                    return graph;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return null;
+    }
+
+    private void saveGraphXml(String graphXML) {
+        // Get the current case
+        Case currentCase;
+        try {
+            currentCase = Case.getCurrentCaseThrows();
+        } catch (NoCurrentCaseException e) {
+            System.err.println("No current case: " + e.getMessage());
+            return;
+        }
+
+//        // Get the case database path
+        String caseDatabasePath = currentCase.getCaseDirectory();
+        String autopsyDbPath = caseDatabasePath + "\\autopsy.db";
+//
+        String url = "jdbc:sqlite:" + autopsyDbPath;
+        try ( Connection conn = DriverManager.getConnection(url)) {
+            if (conn != null) {
+                Statement stmt = conn.createStatement();
+
+                // Create a new table to store your graphXml if it doesn't already exist
+                stmt.execute("CREATE TABLE IF NOT EXISTS graphXmlData (id INTEGER, graphXml TEXT)");
+
+                // Replace '1' with a suitable ID for the graphXml
+                stmt.execute("INSERT INTO graphXmlData (id, graphXml) VALUES (1, '" + graphXml + "')");
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     public mxGraphComponent getGraphComponent() {
