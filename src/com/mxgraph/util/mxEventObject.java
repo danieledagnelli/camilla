@@ -97,4 +97,8 @@ public class mxEventObject
 		consumed = true;
 	}
 
+    public Iterable<Object> getChanges() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
 }

@@ -25,6 +25,8 @@ import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragSource;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -63,6 +65,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.event.TreeExpansionListener;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -80,13 +83,10 @@ import org.openide.nodes.NodeListener;
 import org.openide.nodes.NodeMemberEvent;
 import org.openide.nodes.NodeReorderEvent;
 import org.openide.util.NbBundle;
-import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.autopsy.corecomponents.AbstractDataResultViewer;
 import org.sleuthkit.autopsy.corecomponents.DataResultViewerTable;
 import org.sleuthkit.autopsy.corecomponents.TableFilterNode;
 import org.sleuthkit.autopsy.coreutils.MessageNotifyUtil;
-import org.sleuthkit.datamodel.BlackboardArtifact;
-import org.sleuthkit.datamodel.SleuthkitCase;
 
 /**
  * A tabular result viewer that displays the children of the given root node
@@ -141,11 +141,8 @@ public class Camilla extends AbstractDataResultViewer {
     private final TableListener outlineViewListener;
     private final IconRendererTableListener iconRendererListener;
     private Node rootNode;
+    
 
-    
-    
-    
-    
     /**
      * Multiple nodes may have been visited in the context of this
      * DataResultViewerTable. We keep track of the page state for these nodes in
@@ -1474,6 +1471,21 @@ public class Camilla extends AbstractDataResultViewer {
         });
         jSplitPane1.setLeftComponent(outlineView);
         jSplitPane1.setRightComponent(canvasPanel);
+
+// Add a ComponentListener to set the divider location after the JSplitPane is shown
+        jSplitPane1.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                int parentWidth = jSplitPane1.getSize().width;
+                int dividerLocation = (int) (parentWidth * 0.1); // 10% of the parent component's width
+                jSplitPane1.setDividerLocation(dividerLocation);
+            }
+        });
+
+// Prevent the divider from being moved
+        BasicSplitPaneUI ui = (BasicSplitPaneUI) jSplitPane1.getUI();
+        ui.getDivider().setEnabled(false);
+
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
