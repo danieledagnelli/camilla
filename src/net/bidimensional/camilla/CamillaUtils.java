@@ -6,11 +6,17 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import org.jfree.data.json.impl.JSONArray;
 import org.jfree.data.json.impl.JSONObject;
+import org.openide.nodes.AbstractNode;
+import org.openide.nodes.Children;
+import org.openide.nodes.Node;
+import org.sleuthkit.datamodel.Content;
+import org.sleuthkit.datamodel.SleuthkitCase;
+import org.sleuthkit.datamodel.TskCoreException;
 
 public class CamillaUtils {
 
     private static final String GPT_API_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String API_KEY = "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";
+    private static final String API_KEY = "TBD";
 
     public static String getResponseFromGpt4(String xmlInput) throws IOException {
         JSONObject systemMessage = new JSONObject();
@@ -65,4 +71,6 @@ public class CamillaUtils {
 
         return response.toString();
     }
+
+  
 }

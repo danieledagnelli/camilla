@@ -50,7 +50,7 @@ import org.sleuthkit.datamodel.TskCoreException;
 import org.sleuthkit.datamodel.TskDataException;
 import org.w3c.dom.Document;
 
-public class CamillaCanvas extends JPanel {
+public class CamillaTimelineCanvas extends JPanel {
 
     private mxGraph graph;
     private Object parent;
@@ -69,7 +69,7 @@ public class CamillaCanvas extends JPanel {
         return graph;
     }
 
-    public CamillaCanvas() {
+    public CamillaTimelineCanvas() {
         super();
         setLayout(new BorderLayout());  // Set the layout to BorderLayout
 
@@ -236,7 +236,7 @@ public class CamillaCanvas extends JPanel {
                 Statement stmt = conn.createStatement();
 
                 // Replace '1' with the ID used to save the graphXml
-                ResultSet resultSet = stmt.executeQuery("SELECT graphXml FROM graphXmlData WHERE id = 1");
+                ResultSet resultSet = stmt.executeQuery("SELECT graphXml FROM timelineXmlData WHERE id = 1");
 
                 if (resultSet.next()) {
                     graphXml = resultSet.getString("graphXml");
@@ -283,10 +283,10 @@ public class CamillaCanvas extends JPanel {
                 Statement stmt = conn.createStatement();
 
                 // Create a new table to store your graphXml if it doesn't already exist
-                stmt.execute("CREATE TABLE IF NOT EXISTS graphXmlData (id INTEGER PRIMARY KEY, graphXml TEXT)");
+                stmt.execute("CREATE TABLE IF NOT EXISTS timelineXmlData (id INTEGER PRIMARY KEY, graphXml TEXT)");
 
                 // Replace '1' with a suitable ID for the graphXml
-                stmt.execute("INSERT OR REPLACE INTO graphXmlData (id, graphXml) VALUES (1, '" + graphXml + "')");
+                stmt.execute("INSERT OR REPLACE INTO timelineXmlData (id, graphXml) VALUES (1, '" + graphXml + "')");
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());

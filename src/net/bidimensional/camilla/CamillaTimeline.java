@@ -100,7 +100,7 @@ import org.sleuthkit.autopsy.coreutils.MessageNotifyUtil;
  */
 @ServiceProvider(service = DataResultViewer.class)
 @SuppressWarnings("PMD.SingularField") // UI widgets cause lots of false positives
-public class Camilla extends AbstractDataResultViewer {
+public class CamillaTimeline extends AbstractDataResultViewer {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(DataResultViewerTable.class.getName());
@@ -132,8 +132,8 @@ public class Camilla extends AbstractDataResultViewer {
     private static final ImageIcon COMMENT_ICON = new ImageIcon(ImageUtilities.loadImage(NOTEPAD_ICON_PATH, false));
     private static final ImageIcon INTERESTING_SCORE_ICON = new ImageIcon(ImageUtilities.loadImage(YELLOW_CIRCLE_ICON_PATH, false));
     private static final ImageIcon NOTABLE_ICON_SCORE = new ImageIcon(ImageUtilities.loadImage(RED_CIRCLE_ICON_PATH, false));
-    @NbBundle.Messages("Camilla.firstColLbl=Name")
-    static private final String FIRST_COLUMN_LABEL = Bundle.Camilla_firstColLbl();
+    @NbBundle.Messages("CamillaTimeline.firstColLbl=Name")
+    static private final String FIRST_COLUMN_LABEL = Bundle.CamillaTimeline_firstColLbl();
     private final String title;
     private final Map<String, ETableColumn> columnMap;
     private final Map<Integer, Node.Property<?>> propertiesMap;
@@ -162,8 +162,8 @@ public class Camilla extends AbstractDataResultViewer {
      * OutlineView to the actions global context. The explorer manager will be
      * discovered at runtime.
      */
-    public Camilla() {
-        this(null, Bundle.Camilla_title());
+    public CamillaTimeline() {
+        this(null, Bundle.CamillaTimeline_title());
         this.nodeFlavor = new DataFlavor(JComponent.class, "JComponent");
     }
 
@@ -176,8 +176,8 @@ public class Camilla extends AbstractDataResultViewer {
      * @param explorerManager The explorer manager of the ancestor top
      * component.
      */
-    public Camilla(ExplorerManager explorerManager) {
-        this(explorerManager, Bundle.Camilla_title());
+    public CamillaTimeline(ExplorerManager explorerManager) {
+        this(explorerManager, Bundle.CamillaTimeline_title());
     }
 
     /**
@@ -190,7 +190,7 @@ public class Camilla extends AbstractDataResultViewer {
      * component.
      * @param title The title.
      */
-    public Camilla(ExplorerManager explorerManager, String title) {
+    public CamillaTimeline(ExplorerManager explorerManager, String title) {
 
         super(explorerManager);
         System.setProperty("org.graphstream.ui", "swing");
@@ -291,7 +291,7 @@ public class Camilla extends AbstractDataResultViewer {
      * @return title of tab.
      */
     @Override
-    @NbBundle.Messages("Camilla.title=Camilla Graph Builder")
+    @NbBundle.Messages("CamillaTimeline.title=Camilla Timeline Builder")
     public String getTitle() {
         return title;
     }
@@ -894,8 +894,8 @@ public class Camilla extends AbstractDataResultViewer {
         }
 
         @NbBundle.Messages({"# {0} - totalPages",
-            "Camilla.goToPageTextField.msgDlg=Please enter a valid page number between 1 and {0}",
-            "Camilla.goToPageTextField.err=Invalid page number"})
+            "CamillaTimeline.goToPageTextField.msgDlg=Please enter a valid page number between 1 and {0}",
+            "CamillaTimeline.goToPageTextField.err=Invalid page number"})
         void gotoPage() {
             int originalPage = currentPage;
 
@@ -908,9 +908,9 @@ public class Camilla extends AbstractDataResultViewer {
 
             if (currentPage > totalPages || currentPage < 1) {
                 currentPage = originalPage;
-                JOptionPane.showMessageDialog(Camilla.this,
-                        Bundle.Camilla_goToPageTextField_msgDlg(totalPages),
-                        Bundle.Camilla_goToPageTextField_err(),
+                JOptionPane.showMessageDialog(CamillaTimeline.this,
+                        Bundle.CamillaTimeline_goToPageTextField_msgDlg(totalPages),
+                        Bundle.CamillaTimeline_goToPageTextField_err(),
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -927,7 +927,7 @@ public class Camilla extends AbstractDataResultViewer {
             } catch (BaseChildFactory.NoSuchEventBusException ex) {
                 LOGGER.log(Level.WARNING, "Failed to post page change event.", ex); //NON-NLS
             }
-            Camilla.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            CamillaTimeline.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             updateControls();
         }
 
@@ -989,7 +989,7 @@ public class Camilla extends AbstractDataResultViewer {
         }
 
         @NbBundle.Messages({"# {0} - currentPage", "# {1} - totalPages",
-            "Camilla.pageNumbers.curOfTotal={0} of {1}"})
+            "CamillaTimeline.pageNumbers.curOfTotal={0} of {1}"})
         private void updateControls() {
             if (totalPages == 0) {
                 pagePrevButton.setEnabled(false);
@@ -998,7 +998,7 @@ public class Camilla extends AbstractDataResultViewer {
                 gotoPageTextField.setText("");
                 gotoPageTextField.setEnabled(false);
             } else {
-                pageNumLabel.setText(Bundle.Camilla_pageNumbers_curOfTotal(Integer.toString(currentPage), Integer.toString(totalPages)));
+                pageNumLabel.setText(Bundle.CamillaTimeline_pageNumbers_curOfTotal(Integer.toString(currentPage), Integer.toString(totalPages)));
 
                 pageNextButton.setEnabled(currentPage != totalPages);
                 pagePrevButton.setEnabled(currentPage != 1);
@@ -1014,26 +1014,26 @@ public class Camilla extends AbstractDataResultViewer {
      */
     private class IconRendererTableListener implements TableColumnModelListener {
 
-        @NbBundle.Messages({"Camilla.commentRender.name=C",
-            "Camilla.commentRender.toolTip=C(omments) indicates whether the item has a comment",
-            "Camilla.scoreRender.name=S",
-            "Camilla.scoreRender.toolTip=S(core) indicates whether the item is interesting or notable",
-            "Camilla.countRender.name=O",
-            "Camilla.countRender.toolTip=O(ccurrences) indicates the number of data sources containing the item in the Central Repository"})
+        @NbBundle.Messages({"CamillaTimeline.commentRender.name=C",
+            "CamillaTimeline.commentRender.toolTip=C(omments) indicates whether the item has a comment",
+            "CamillaTimeline.scoreRender.name=S",
+            "CamillaTimeline.scoreRender.toolTip=S(core) indicates whether the item is interesting or notable",
+            "CamillaTimeline.countRender.name=O",
+            "CamillaTimeline.countRender.toolTip=O(ccurrences) indicates the number of data sources containing the item in the Central Repository"})
         @Override
         public void columnAdded(TableColumnModelEvent e) {
             if (e.getSource() instanceof ETableColumnModel) {
                 TableColumn column = ((TableColumnModel) e.getSource()).getColumn(e.getToIndex());
-                if (column.getHeaderValue().toString().equals(Bundle.Camilla_commentRender_name())) {
+                if (column.getHeaderValue().toString().equals(Bundle.CamillaTimeline_commentRender_name())) {
                     //if the current column is a comment column set the cell renderer to be the HasCommentCellRenderer
-                    outlineView.setPropertyColumnDescription(column.getHeaderValue().toString(), Bundle.Camilla_commentRender_toolTip());
+                    outlineView.setPropertyColumnDescription(column.getHeaderValue().toString(), Bundle.CamillaTimeline_commentRender_toolTip());
                     column.setCellRenderer(new HasCommentCellRenderer());
-                } else if (column.getHeaderValue().toString().equals(Bundle.Camilla_scoreRender_name())) {
+                } else if (column.getHeaderValue().toString().equals(Bundle.CamillaTimeline_scoreRender_name())) {
                     //if the current column is a score column set the cell renderer to be the ScoreCellRenderer
-                    outlineView.setPropertyColumnDescription(column.getHeaderValue().toString(), Bundle.Camilla_scoreRender_toolTip());
+                    outlineView.setPropertyColumnDescription(column.getHeaderValue().toString(), Bundle.CamillaTimeline_scoreRender_toolTip());
                     column.setCellRenderer(new ScoreCellRenderer());
-                } else if (column.getHeaderValue().toString().equals(Bundle.Camilla_countRender_name())) {
-                    outlineView.setPropertyColumnDescription(column.getHeaderValue().toString(), Bundle.Camilla_countRender_toolTip());
+                } else if (column.getHeaderValue().toString().equals(Bundle.CamillaTimeline_countRender_name())) {
+                    outlineView.setPropertyColumnDescription(column.getHeaderValue().toString(), Bundle.CamillaTimeline_countRender_toolTip());
                     column.setCellRenderer(new CountCellRenderer());
                 }
             }
@@ -1172,7 +1172,7 @@ public class Camilla extends AbstractDataResultViewer {
          */
         private void columnAddedOrRemoved() {
             if (listenToVisibilitEvents) {
-                SwingUtilities.invokeLater(Camilla.this::storeColumnVisibility);
+                SwingUtilities.invokeLater(CamillaTimeline.this::storeColumnVisibility);
 
             }
         }
@@ -1207,10 +1207,10 @@ public class Camilla extends AbstractDataResultViewer {
 
         private static final long serialVersionUID = 1L;
 
-        @NbBundle.Messages({"Camilla.commentRenderer.crComment.toolTip=Comment exists in Central Repository",
-            "Camilla.commentRenderer.tagComment.toolTip=Comment exists on associated tag(s)",
-            "Camilla.commentRenderer.crAndTagComment.toolTip=Comments exist both in Central Repository and on associated tag(s)",
-            "Camilla.commentRenderer.noComment.toolTip=No comments found"})
+        @NbBundle.Messages({"CamillaTimeline.commentRenderer.crComment.toolTip=Comment exists in Central Repository",
+            "CamillaTimeline.commentRenderer.tagComment.toolTip=Comment exists on associated tag(s)",
+            "CamillaTimeline.commentRenderer.crAndTagComment.toolTip=Comments exist both in Central Repository and on associated tag(s)",
+            "CamillaTimeline.commentRenderer.noComment.toolTip=No comments found"})
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -1234,21 +1234,21 @@ public class Camilla extends AbstractDataResultViewer {
                 switch ((HasCommentStatus) switchValue) {
                     case CR_COMMENT:
                         setIcon(COMMENT_ICON);
-                        setToolTipText(Bundle.Camilla_commentRenderer_crComment_toolTip());
+                        setToolTipText(Bundle.CamillaTimeline_commentRenderer_crComment_toolTip());
                         break;
                     case TAG_COMMENT:
                         setIcon(COMMENT_ICON);
-                        setToolTipText(Bundle.Camilla_commentRenderer_tagComment_toolTip());
+                        setToolTipText(Bundle.CamillaTimeline_commentRenderer_tagComment_toolTip());
                         break;
                     case CR_AND_TAG_COMMENTS:
                         setIcon(COMMENT_ICON);
-                        setToolTipText(Bundle.Camilla_commentRenderer_crAndTagComment_toolTip());
+                        setToolTipText(Bundle.CamillaTimeline_commentRenderer_crAndTagComment_toolTip());
                         break;
                     case TAG_NO_COMMENT:
                     case NO_COMMENT:
                     default:
                         setIcon(null);
-                        setToolTipText(Bundle.Camilla_commentRenderer_noComment_toolTip());
+                        setToolTipText(Bundle.CamillaTimeline_commentRenderer_noComment_toolTip());
                 }
             } else {
                 setIcon(null);
@@ -1399,17 +1399,17 @@ public class Camilla extends AbstractDataResultViewer {
         gotoPageTextField = new javax.swing.JTextField();
         exportCSVButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
-        outlineView = new CamillaOutlineView(Camilla.FIRST_COLUMN_LABEL);
-        canvasPanel = new CamillaCanvas();
+        outlineView = new CamillaOutlineView(CamillaTimeline.FIRST_COLUMN_LABEL);
+        canvasPanel = new CamillaTimelineCanvas();
 
-        pageLabel.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pageLabel.text")); // NOI18N
+        pageLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.pageLabel.text")); // NOI18N
 
-        pageNumLabel.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pageNumLabel.text")); // NOI18N
+        pageNumLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.pageNumLabel.text")); // NOI18N
 
-        pagesLabel.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pagesLabel.text")); // NOI18N
+        pagesLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.pagesLabel.text")); // NOI18N
 
         pagePrevButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_back.png"))); // NOI18N
-        pagePrevButton.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pagePrevButton.text")); // NOI18N
+        pagePrevButton.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.pagePrevButton.text")); // NOI18N
         pagePrevButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_back_disabled.png"))); // NOI18N
         pagePrevButton.setFocusable(false);
         pagePrevButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1424,7 +1424,7 @@ public class Camilla extends AbstractDataResultViewer {
         });
 
         pageNextButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_forward.png"))); // NOI18N
-        pageNextButton.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pageNextButton.text")); // NOI18N
+        pageNextButton.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.pageNextButton.text")); // NOI18N
         pageNextButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_forward_disabled.png"))); // NOI18N
         pageNextButton.setFocusable(false);
         pageNextButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1439,9 +1439,9 @@ public class Camilla extends AbstractDataResultViewer {
             }
         });
 
-        gotoPageLabel.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.gotoPageLabel.text")); // NOI18N
+        gotoPageLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.gotoPageLabel.text")); // NOI18N
 
-        gotoPageTextField.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.gotoPageTextField.text")); // NOI18N
+        gotoPageTextField.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.gotoPageTextField.text")); // NOI18N
         gotoPageTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 gotoPageTextFieldActionPerformed(evt);
@@ -1457,7 +1457,7 @@ public class Camilla extends AbstractDataResultViewer {
 // Set the icon of the button and the tooltip text
         exportCSVButton.setIcon(buttonIcon);
         exportCSVButton.setText(""); // remove the existing text
-        exportCSVButton.setToolTipText(org.openide.util.NbBundle.getMessage(Camilla.class, "CamillaViewerTable.exportPNGButton.text"));
+        exportCSVButton.setToolTipText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "CamillaViewerTable.exportPNGButton.text"));
         exportCSVButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveGraphToPNG(evt);
@@ -1551,19 +1551,19 @@ public class Camilla extends AbstractDataResultViewer {
         pagingSupport.gotoPage();
     }
 
-    @NbBundle.Messages({"Camilla.exportCSVButtonActionPerformed.empty=No data to export"
+    @NbBundle.Messages({"CamillaTimeline.exportCSVButtonActionPerformed.empty=No data to export"
     })
     private void exportImageButtonActionPerformed(java.awt.event.ActionEvent evt) {
         Node currentRoot = this.getExplorerManager().getRootContext();
         if (currentRoot != null && currentRoot.getChildren().getNodesCount() > 0) {
             org.sleuthkit.autopsy.directorytree.ExportCSVAction.saveNodesToCSV(java.util.Arrays.asList(currentRoot.getChildren().getNodes()), this);
         } else {
-            MessageNotifyUtil.Message.info(Bundle.Camilla_exportCSVButtonActionPerformed_empty());
+            MessageNotifyUtil.Message.info(Bundle.CamillaTimeline_exportCSVButtonActionPerformed_empty());
         }
     }
 
     public void saveGraphToPNG(java.awt.event.ActionEvent evt) {
-        mxGraphComponent graphComponent = ((CamillaCanvas) canvasPanel).getGraphComponent();
+        mxGraphComponent graphComponent = ((CamillaTimelineCanvas) canvasPanel).getGraphComponent();
         // Create a BufferedImage of the graph
         BufferedImage image = mxCellRenderer.createBufferedImage(graphComponent.getGraph(), null, 1, Color.WHITE, true, null);
 
