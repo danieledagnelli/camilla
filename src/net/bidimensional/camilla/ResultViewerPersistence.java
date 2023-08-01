@@ -16,7 +16,7 @@ import org.openide.util.NbPreferences;
 import org.sleuthkit.autopsy.corecomponents.DataResultViewerTable;
 import org.sleuthkit.autopsy.corecomponents.TableFilterNode;
 
-final class ResultViewerPersistence {
+final public class ResultViewerPersistence {
 
     private ResultViewerPersistence() {
     }
@@ -30,7 +30,7 @@ final class ResultViewerPersistence {
      *
      * @return A generated key for the preference file
      */
-    static String getColumnPositionKey(TableFilterNode node, String propName) {
+    public static String getColumnPositionKey(TableFilterNode node, String propName) {
         return getColumnKeyBase(node, propName) + ".column";
     }
 
@@ -43,7 +43,7 @@ final class ResultViewerPersistence {
      *
      * @return A generated key for the preference file
      */
-    static String getColumnSortOrderKey(TableFilterNode node, String propName) {
+    public static String getColumnSortOrderKey(TableFilterNode node, String propName) {
         return getColumnKeyBase(node, propName) + ".sortOrder";
     }
 
@@ -56,7 +56,7 @@ final class ResultViewerPersistence {
      *
      * @return A generated key for the preference file
      */
-    static String getColumnSortRankKey(TableFilterNode node, String propName) {
+    public static String getColumnSortRankKey(TableFilterNode node, String propName) {
         return getColumnKeyBase(node, propName) + ".sortRank";
     }
 
@@ -69,7 +69,7 @@ final class ResultViewerPersistence {
      *
      * @return A generated key for the preference file
      */
-    static String getColumnHiddenKey(TableFilterNode node, String propName) {
+    public static String getColumnHiddenKey(TableFilterNode node, String propName) {
         return getColumnKeyBase(node, propName) + ".hidden";
     }
 
@@ -93,7 +93,7 @@ final class ResultViewerPersistence {
      * @return A List of properties discovered on all the children and recursive
      *         subchildren.
      */
-    static List<Node.Property<?>> getAllChildProperties(Node node, int maxRows) {
+    public static List<Node.Property<?>> getAllChildProperties(Node node, int maxRows) {
         // This is a set because we add properties of up to 100 child nodes, and we want unique properties
         Set<Node.Property<?>> propertiesAcc = new LinkedHashSet<>();
         getAllChildPropertiesHelper(node, maxRows, propertiesAcc);

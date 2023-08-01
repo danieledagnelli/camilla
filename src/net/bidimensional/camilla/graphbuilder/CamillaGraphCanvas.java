@@ -1,4 +1,4 @@
-package net.bidimensional.camilla;
+package net.bidimensional.camilla.graphbuilder;
 
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
@@ -36,9 +36,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JViewport;
-import javax.swing.MenuElement;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
+import net.bidimensional.camilla.CamillaCanvas;
+import net.bidimensional.camilla.CamillaGraphModel;
+import net.bidimensional.camilla.CamillaUtils;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.sleuthkit.autopsy.casemodule.Case;
@@ -226,6 +228,8 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
             System.err.println("No current case: " + e.getMessage());
             return null;
         }
+       
+        
 
         // Get the case directory path and append the relative path to the autopsy.db
         String caseDatabasePath = currentCase.getCaseDirectory();
@@ -257,42 +261,6 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
         return null;
     }
     
-//    private void saveGraphXml() {
-//        try {
-//            Class.forName("org.sqlite.JDBC");
-//        } catch (ClassNotFoundException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
-//        
-//        graphXml = mxXmlUtils.getXml(codec.encode(graph.getModel()));
-//        // Get the current case
-//        Case currentCase;
-//        try {
-//            currentCase = Case.getCurrentCaseThrows();
-//        } catch (NoCurrentCaseException e) {
-//            System.err.println("No current case: " + e.getMessage());
-//            return;
-//        }
-//
-////        // Get the case database path
-//        String caseDatabasePath = currentCase.getCaseDirectory();
-//        String autopsyDbPath = caseDatabasePath + "\\autopsy.db";
-////
-//        String url = "jdbc:sqlite:" + autopsyDbPath;
-//        try ( Connection conn = DriverManager.getConnection(url)) {
-//            if (conn != null) {
-//                Statement stmt = conn.createStatement();
-//
-//                // Create a new table to store your graphXml if it doesn't already exist
-//                stmt.execute("CREATE TABLE IF NOT EXISTS graphXmlData (id INTEGER PRIMARY KEY, graphXml TEXT)");
-//
-//                // Replace '1' with a suitable ID for the graphXml
-//                stmt.execute("INSERT OR REPLACE INTO graphXmlData (id, graphXml) VALUES (1, '" + graphXml + "')");
-//            }
-//        } catch (SQLException e) {
-//            System.err.println(e.getMessage());
-//        }
-//    }
     
     public mxGraphComponent getGraphComponent() {
         return graphComponent;

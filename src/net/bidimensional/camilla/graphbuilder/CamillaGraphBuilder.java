@@ -1,8 +1,6 @@
-package net.bidimensional.camilla;
+package net.bidimensional.camilla.graphbuilder;
 
 import com.google.common.eventbus.Subscribe;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxCellRenderer;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbPreferences;
 import org.openide.util.lookup.ServiceProvider;
@@ -18,7 +16,6 @@ import org.sleuthkit.autopsy.datamodel.BaseChildFactory.PageCountChangeEvent;
 import org.sleuthkit.autopsy.datamodel.BaseChildFactory.PageSizeChangeEvent;
 import org.sleuthkit.datamodel.Score.Significance;
 import com.mxgraph.view.mxGraph;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Image;
@@ -29,12 +26,9 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.beans.FeatureDescriptor;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -49,10 +43,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.Preferences;
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -69,6 +61,9 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import net.bidimensional.camilla.CamillaOutlineView;
+import net.bidimensional.camilla.CamillaUtils;
+import net.bidimensional.camilla.ResultViewerPersistence;
 import org.netbeans.swing.etable.ETableColumn;
 import org.netbeans.swing.etable.ETableColumnModel;
 import org.netbeans.swing.outline.DefaultOutlineCellRenderer;
@@ -100,7 +95,7 @@ import org.sleuthkit.autopsy.coreutils.MessageNotifyUtil;
  */
 @ServiceProvider(service = DataResultViewer.class)
 @SuppressWarnings("PMD.SingularField") // UI widgets cause lots of false positives
-public class Camilla extends AbstractDataResultViewer {
+public class CamillaGraphBuilder extends AbstractDataResultViewer {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(DataResultViewerTable.class.getName());
@@ -162,7 +157,7 @@ public class Camilla extends AbstractDataResultViewer {
      * OutlineView to the actions global context. The explorer manager will be
      * discovered at runtime.
      */
-    public Camilla() {
+    public CamillaGraphBuilder() {
         this(null, Bundle.Camilla_title());
         this.nodeFlavor = new DataFlavor(JComponent.class, "JComponent");
     }
@@ -176,7 +171,7 @@ public class Camilla extends AbstractDataResultViewer {
      * @param explorerManager The explorer manager of the ancestor top
      * component.
      */
-    public Camilla(ExplorerManager explorerManager) {
+    public CamillaGraphBuilder(ExplorerManager explorerManager) {
         this(explorerManager, Bundle.Camilla_title());
     }
 
@@ -190,7 +185,7 @@ public class Camilla extends AbstractDataResultViewer {
      * component.
      * @param title The title.
      */
-    public Camilla(ExplorerManager explorerManager, String title) {
+    public CamillaGraphBuilder(ExplorerManager explorerManager, String title) {
 
         super(explorerManager);
         System.setProperty("org.graphstream.ui", "swing");
@@ -908,7 +903,7 @@ public class Camilla extends AbstractDataResultViewer {
 
             if (currentPage > totalPages || currentPage < 1) {
                 currentPage = originalPage;
-                JOptionPane.showMessageDialog(Camilla.this,
+                JOptionPane.showMessageDialog(CamillaGraphBuilder.this,
                         Bundle.Camilla_goToPageTextField_msgDlg(totalPages),
                         Bundle.Camilla_goToPageTextField_err(),
                         JOptionPane.WARNING_MESSAGE);
@@ -927,7 +922,7 @@ public class Camilla extends AbstractDataResultViewer {
             } catch (BaseChildFactory.NoSuchEventBusException ex) {
                 LOGGER.log(Level.WARNING, "Failed to post page change event.", ex); //NON-NLS
             }
-            Camilla.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            CamillaGraphBuilder.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             updateControls();
         }
 
@@ -1172,7 +1167,7 @@ public class Camilla extends AbstractDataResultViewer {
          */
         private void columnAddedOrRemoved() {
             if (listenToVisibilitEvents) {
-                SwingUtilities.invokeLater(Camilla.this::storeColumnVisibility);
+                SwingUtilities.invokeLater(CamillaGraphBuilder.this::storeColumnVisibility);
 
             }
         }
@@ -1399,17 +1394,17 @@ public class Camilla extends AbstractDataResultViewer {
         gotoPageTextField = new javax.swing.JTextField();
         exportCSVButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
-        outlineView = new CamillaOutlineView(Camilla.FIRST_COLUMN_LABEL);
+        outlineView = new CamillaOutlineView(CamillaGraphBuilder.FIRST_COLUMN_LABEL);
         canvasPanel = new CamillaGraphCanvas();
 
-        pageLabel.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pageLabel.text")); // NOI18N
+        pageLabel.setText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "DataResultViewerTable.pageLabel.text")); // NOI18N
 
-        pageNumLabel.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pageNumLabel.text")); // NOI18N
+        pageNumLabel.setText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "DataResultViewerTable.pageNumLabel.text")); // NOI18N
 
-        pagesLabel.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pagesLabel.text")); // NOI18N
+        pagesLabel.setText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "DataResultViewerTable.pagesLabel.text")); // NOI18N
 
         pagePrevButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_back.png"))); // NOI18N
-        pagePrevButton.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pagePrevButton.text")); // NOI18N
+        pagePrevButton.setText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "DataResultViewerTable.pagePrevButton.text")); // NOI18N
         pagePrevButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_back_disabled.png"))); // NOI18N
         pagePrevButton.setFocusable(false);
         pagePrevButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1424,7 +1419,7 @@ public class Camilla extends AbstractDataResultViewer {
         });
 
         pageNextButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_forward.png"))); // NOI18N
-        pageNextButton.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pageNextButton.text")); // NOI18N
+        pageNextButton.setText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "DataResultViewerTable.pageNextButton.text")); // NOI18N
         pageNextButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_forward_disabled.png"))); // NOI18N
         pageNextButton.setFocusable(false);
         pageNextButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1439,9 +1434,9 @@ public class Camilla extends AbstractDataResultViewer {
             }
         });
 
-        gotoPageLabel.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.gotoPageLabel.text")); // NOI18N
+        gotoPageLabel.setText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "DataResultViewerTable.gotoPageLabel.text")); // NOI18N
 
-        gotoPageTextField.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.gotoPageTextField.text")); // NOI18N
+        gotoPageTextField.setText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "DataResultViewerTable.gotoPageTextField.text")); // NOI18N
         gotoPageTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 gotoPageTextFieldActionPerformed(evt);
@@ -1457,12 +1452,15 @@ public class Camilla extends AbstractDataResultViewer {
 // Set the icon of the button and the tooltip text
         exportCSVButton.setIcon(buttonIcon);
         exportCSVButton.setText(""); // remove the existing text
-        exportCSVButton.setToolTipText(org.openide.util.NbBundle.getMessage(Camilla.class, "CamillaViewerTable.exportPNGButton.text"));
+        exportCSVButton.setToolTipText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "CamillaViewerTable.exportPNGButton.text"));
         exportCSVButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CamillaUtils.saveGraphToPNG(canvasPanel);
             }
         });
+        
+        
+        //TODO: Implement Clear Graph (and Timeline) button
 
         outlineView.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {

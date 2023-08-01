@@ -1,4 +1,4 @@
-package net.bidimensional.camilla;
+package net.bidimensional.camilla.timelinebuilder;
 
 import com.google.common.eventbus.Subscribe;
 import com.mxgraph.swing.mxGraphComponent;
@@ -69,6 +69,9 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import net.bidimensional.camilla.CamillaOutlineView;
+import net.bidimensional.camilla.CamillaUtils;
+import net.bidimensional.camilla.ResultViewerPersistence;
 import org.netbeans.swing.etable.ETableColumn;
 import org.netbeans.swing.etable.ETableColumnModel;
 import org.netbeans.swing.outline.DefaultOutlineCellRenderer;
@@ -100,7 +103,7 @@ import org.sleuthkit.autopsy.coreutils.MessageNotifyUtil;
  */
 @ServiceProvider(service = DataResultViewer.class)
 @SuppressWarnings("PMD.SingularField") // UI widgets cause lots of false positives
-public class CamillaTimeline extends AbstractDataResultViewer {
+public class CamillaTimelineBuilder extends AbstractDataResultViewer {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(DataResultViewerTable.class.getName());
@@ -162,7 +165,7 @@ public class CamillaTimeline extends AbstractDataResultViewer {
      * OutlineView to the actions global context. The explorer manager will be
      * discovered at runtime.
      */
-    public CamillaTimeline() {
+    public CamillaTimelineBuilder() {
         this(null, Bundle.CamillaTimeline_title());
         this.nodeFlavor = new DataFlavor(JComponent.class, "JComponent");
     }
@@ -176,7 +179,7 @@ public class CamillaTimeline extends AbstractDataResultViewer {
      * @param explorerManager The explorer manager of the ancestor top
      * component.
      */
-    public CamillaTimeline(ExplorerManager explorerManager) {
+    public CamillaTimelineBuilder(ExplorerManager explorerManager) {
         this(explorerManager, Bundle.CamillaTimeline_title());
     }
 
@@ -190,7 +193,7 @@ public class CamillaTimeline extends AbstractDataResultViewer {
      * component.
      * @param title The title.
      */
-    public CamillaTimeline(ExplorerManager explorerManager, String title) {
+    public CamillaTimelineBuilder(ExplorerManager explorerManager, String title) {
 
         super(explorerManager);
         System.setProperty("org.graphstream.ui", "swing");
@@ -908,7 +911,7 @@ public class CamillaTimeline extends AbstractDataResultViewer {
 
             if (currentPage > totalPages || currentPage < 1) {
                 currentPage = originalPage;
-                JOptionPane.showMessageDialog(CamillaTimeline.this,
+                JOptionPane.showMessageDialog(CamillaTimelineBuilder.this,
                         Bundle.CamillaTimeline_goToPageTextField_msgDlg(totalPages),
                         Bundle.CamillaTimeline_goToPageTextField_err(),
                         JOptionPane.WARNING_MESSAGE);
@@ -927,7 +930,7 @@ public class CamillaTimeline extends AbstractDataResultViewer {
             } catch (BaseChildFactory.NoSuchEventBusException ex) {
                 LOGGER.log(Level.WARNING, "Failed to post page change event.", ex); //NON-NLS
             }
-            CamillaTimeline.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            CamillaTimelineBuilder.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             updateControls();
         }
 
@@ -1172,7 +1175,7 @@ public class CamillaTimeline extends AbstractDataResultViewer {
          */
         private void columnAddedOrRemoved() {
             if (listenToVisibilitEvents) {
-                SwingUtilities.invokeLater(CamillaTimeline.this::storeColumnVisibility);
+                SwingUtilities.invokeLater(CamillaTimelineBuilder.this::storeColumnVisibility);
 
             }
         }
@@ -1399,17 +1402,17 @@ public class CamillaTimeline extends AbstractDataResultViewer {
         gotoPageTextField = new javax.swing.JTextField();
         exportCSVButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
-        outlineView = new CamillaOutlineView(CamillaTimeline.FIRST_COLUMN_LABEL);
+        outlineView = new CamillaOutlineView(CamillaTimelineBuilder.FIRST_COLUMN_LABEL);
         canvasPanel = new CamillaTimelineCanvas();
 
-        pageLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.pageLabel.text")); // NOI18N
+        pageLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimelineBuilder.class, "DataResultViewerTable.pageLabel.text")); // NOI18N
 
-        pageNumLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.pageNumLabel.text")); // NOI18N
+        pageNumLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimelineBuilder.class, "DataResultViewerTable.pageNumLabel.text")); // NOI18N
 
-        pagesLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.pagesLabel.text")); // NOI18N
+        pagesLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimelineBuilder.class, "DataResultViewerTable.pagesLabel.text")); // NOI18N
 
         pagePrevButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_back.png"))); // NOI18N
-        pagePrevButton.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.pagePrevButton.text")); // NOI18N
+        pagePrevButton.setText(org.openide.util.NbBundle.getMessage(CamillaTimelineBuilder.class, "DataResultViewerTable.pagePrevButton.text")); // NOI18N
         pagePrevButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_back_disabled.png"))); // NOI18N
         pagePrevButton.setFocusable(false);
         pagePrevButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1424,7 +1427,7 @@ public class CamillaTimeline extends AbstractDataResultViewer {
         });
 
         pageNextButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_forward.png"))); // NOI18N
-        pageNextButton.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.pageNextButton.text")); // NOI18N
+        pageNextButton.setText(org.openide.util.NbBundle.getMessage(CamillaTimelineBuilder.class, "DataResultViewerTable.pageNextButton.text")); // NOI18N
         pageNextButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/org/sleuthkit/autopsy/corecomponents/btn_step_forward_disabled.png"))); // NOI18N
         pageNextButton.setFocusable(false);
         pageNextButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1439,9 +1442,9 @@ public class CamillaTimeline extends AbstractDataResultViewer {
             }
         });
 
-        gotoPageLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.gotoPageLabel.text")); // NOI18N
+        gotoPageLabel.setText(org.openide.util.NbBundle.getMessage(CamillaTimelineBuilder.class, "DataResultViewerTable.gotoPageLabel.text")); // NOI18N
 
-        gotoPageTextField.setText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "DataResultViewerTable.gotoPageTextField.text")); // NOI18N
+        gotoPageTextField.setText(org.openide.util.NbBundle.getMessage(CamillaTimelineBuilder.class, "DataResultViewerTable.gotoPageTextField.text")); // NOI18N
         gotoPageTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 gotoPageTextFieldActionPerformed(evt);
@@ -1457,7 +1460,7 @@ public class CamillaTimeline extends AbstractDataResultViewer {
 // Set the icon of the button and the tooltip text
         exportCSVButton.setIcon(buttonIcon);
         exportCSVButton.setText(""); // remove the existing text
-        exportCSVButton.setToolTipText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "CamillaViewerTable.exportPNGButton.text"));
+        exportCSVButton.setToolTipText(org.openide.util.NbBundle.getMessage(CamillaTimelineBuilder.class, "CamillaViewerTable.exportPNGButton.text"));
         exportCSVButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CamillaUtils.saveGraphToPNG(canvasPanel);
