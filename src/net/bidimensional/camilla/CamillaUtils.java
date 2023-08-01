@@ -1,6 +1,7 @@
 package net.bidimensional.camilla;
 
 import com.mxgraph.io.mxCodec;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxXmlUtils;
@@ -198,4 +199,22 @@ public class CamillaUtils {
         }
     }
 
+    public static mxCell getCellByName(mxGraph graph, String name) {
+        Object parent = graph.getDefaultParent();
+        int childCount = graph.getModel().getChildCount(parent);
+
+        for (int i = 0; i < childCount; i++) {
+            Object childCell = graph.getModel().getChildAt(parent, i);
+
+            if (childCell instanceof mxCell) {
+                mxCell cell = (mxCell) childCell;
+
+                if (name.equals(cell.getId())) {
+                    return cell;
+                }
+            }
+        }
+
+        return null;
+    }
 }

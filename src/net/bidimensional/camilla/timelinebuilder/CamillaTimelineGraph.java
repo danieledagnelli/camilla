@@ -34,7 +34,7 @@ public class CamillaTimelineGraph extends mxGraph {
         return false;
     }
 
-    private boolean isBackgroundArrowEdge(Object cell) {
+    private boolean isBackgroundArrowVertex(Object cell) {
         if (cell instanceof mxCell) {
             mxCell mxCell = (mxCell) cell;
             // Add your conditions here based on the mxCell object
@@ -49,30 +49,33 @@ public class CamillaTimelineGraph extends mxGraph {
     @Override
     public boolean isCellResizable(Object cell) {
         //if is background arrow, then can't be changed
-        return !isBackgroundArrow(cell);
+        return !(isBackgroundArrow(cell) || isBackgroundArrowVertex(cell));
     }
+
 
     @Override
     public boolean isCellSelectable(Object cell) {
         //if is background arrow, then can't be changed
-        return !isBackgroundArrowEdge(cell);
+        return !(isBackgroundArrow(cell) || isBackgroundArrowVertex(cell));
     }
 
-//    @Override
-//    public boolean isCellLocked(Object cell) {
-//        //if is background arrow, then can't be changed
-//        return !isBackgroundArrow(cell);
-//    }
+    @Override
+    public boolean isCellLocked(Object cell) {
+        //if is background arrow, then can't be changed
+        return isBackgroundArrowVertex(cell);
+    }
 
-//    @Override
-//    public boolean isCellMovable(Object cell) {
-//        //if is background arrow, then can't be changed
-//        return !isBackgroundArrow(cell);
-//    }
-    
+    @Override
+    public boolean isCellMovable(Object cell) {
+        //if is background arrow, then can't be changed
+//        return isBackgroundArrow(cell) || isBackgroundArrowVertex(cell);
+        return !isBackgroundArrowVertex(cell);
+
+    }
+
     @Override
     public boolean isCellDeletable(Object cell) {
         //if is background arrow, then can't be changed
-        return !isBackgroundArrow(cell) || !isBackgroundArrowEdge(cell);
+        return !(isBackgroundArrow(cell) || isBackgroundArrowVertex(cell));
     }
 };

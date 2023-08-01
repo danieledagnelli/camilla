@@ -39,7 +39,6 @@ import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import net.bidimensional.camilla.CamillaCanvas;
-import net.bidimensional.camilla.CamillaGraphModel;
 import net.bidimensional.camilla.CamillaUtils;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
@@ -126,18 +125,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
         graph.getModel().addListener(mxEvent.CHANGE, new mxIEventListener() {
             @Override
             public void invoke(Object sender, mxEventObject evt) {
-//                for (Object change : ((List<mxAtomicGraphModelChange>) evt.getProperty("changes"))) {
-//                    if (change instanceof mxChildChange && ((mxChildChange) change).getPrevious() == null) {
-//                        Object cell = ((mxChildChange) change).getChild();
-//                        if (graph.getModel().isEdge(cell)) {
-//                            Object source = graph.getModel().getTerminal(cell, true);
-//                            Object target = graph.getModel().getTerminal(cell, false);
-//                            if (source == null || target == null) {
-//                                ((mxCell) cell).setStyle("strokeColor=red");
-//                            }
-//                        }
-//                    }
-//                }
+
                 CamillaUtils.saveGraphXml(graph, this.getClass().getName());
 //                saveGraphXml();
             }

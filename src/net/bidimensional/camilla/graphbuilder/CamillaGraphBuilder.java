@@ -1560,29 +1560,6 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
         }
     }
 
-//    public void saveGraphToPNG(java.awt.event.ActionEvent evt) {
-//        mxGraphComponent graphComponent = ((CamillaCanvas) canvasPanel).getGraphComponent();
-//        // Create a BufferedImage of the graph
-//        BufferedImage image = mxCellRenderer.createBufferedImage(graphComponent.getGraph(), null, 1, Color.WHITE, true, null);
-//
-//        // Create a file chooser
-//        JFileChooser fileChooser = new JFileChooser();
-//        fileChooser.setDialogTitle("Specify a file to save");
-//
-//        // Show save dialog; this method does not return until the dialog is closed
-//        int userSelection = fileChooser.showSaveDialog(graphComponent);
-//
-//        if (userSelection == JFileChooser.APPROVE_OPTION) {
-//            File fileToSave = fileChooser.getSelectedFile();
-//
-//            // Write the BufferedImage to a file
-//            try {
-//                ImageIO.write(image, "PNG", fileToSave);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
 
     private void outlineViewComponentResized(java.awt.event.ComponentEvent evt) {
         // TODO add your handling code here:

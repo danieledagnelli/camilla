@@ -10,12 +10,8 @@ import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxXmlUtils;
-import com.mxgraph.view.mxGraph;
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -36,8 +32,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
@@ -46,11 +40,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JViewport;
-import javax.swing.MenuElement;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import net.bidimensional.camilla.CamillaCanvas;
-import net.bidimensional.camilla.CamillaGraphModel;
 import net.bidimensional.camilla.CamillaUtils;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
@@ -65,7 +57,7 @@ import org.w3c.dom.Document;
 
 public class CamillaTimelineCanvas extends JPanel implements CamillaCanvas {
 
-    private CamillaTimelineGraph graph;
+    private CamillaTimelineGraph timeline;
     private Object parent;
     private mxGraphComponent graphComponent;
     private Case currentCase;
@@ -83,7 +75,7 @@ public class CamillaTimelineCanvas extends JPanel implements CamillaCanvas {
     private Object arrowEdge;  // Add this line
 
     public CamillaTimelineGraph getGraph() {
-        return graph;
+        return timeline;
     }
 
     public CamillaTimelineCanvas() {
@@ -107,39 +99,43 @@ public class CamillaTimelineCanvas extends JPanel implements CamillaCanvas {
 
         codec = new mxCodec();
 
-        graph = loadTimeline();
+        timeline = loadTimeline();
 
-        if (graph == null) {
-            graph = new CamillaTimelineGraph(new CamillaGraphModel());
-        }
-        this.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                super.componentResized(e);
-                if (!lineAdded) {
+        if (timeline == null) {
+            timeline = new CamillaTimelineGraph(new CamillaTimelineModel());
+
+            this.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    super.componentResized(e);
+
                     double yPosition = getHeight() * 0.8; // 80% from the bottom
                     double width = getWidth() * 0.6; // 60% of screen width
                     double xPosition = (getWidth() - width) / 2; // centering the line
-                    graph.getModel().beginUpdate();
+                    timeline.getModel().beginUpdate();
                     try {
-
-                        arrowStartVertex = graph.insertVertex(parent, "arrowStartVertex", "", xPosition, yPosition, 0, 0, "strokeColor=black;fillColor=black;");
-                        arrowEndVertex = graph.insertVertex(parent, "arrowEndVertex", "", xPosition + width, yPosition, 0, 0, "strokeColor=black;fillColor=black;");
-                        arrowEdge = graph.insertEdge(parent, "arrowEdge", "", arrowStartVertex, arrowEndVertex, "endArrow=classic;endFill=1;strokeColor=black;");
-
+                        if (!lineAdded) {
+                            arrowStartVertex = timeline.insertVertex(parent, "arrowStartVertex", "", xPosition, yPosition, 0, 0, "strokeColor=black;fillColor=black;");
+                            arrowEndVertex = timeline.insertVertex(parent, "arrowEndVertex", "", xPosition + width, yPosition, 0, 0, "strokeColor=black;fillColor=black;");
+                            arrowEdge = timeline.insertEdge(parent, "arrowEdge", "", arrowStartVertex, arrowEndVertex, "endArrow=classic;endFill=1;strokeColor=black;");
+                            lineAdded = true;
+                        }
                     } finally {
-                        graph.getModel().endUpdate();
-                        lineAdded = true;
+                        timeline.getModel().endUpdate();
                     }
 
                 }
-            }
-        });
+            });
+            CamillaUtils.saveGraphXml(timeline, this.getClass().getName());
+            timeline = loadTimeline();
 
-        graph.setCellsMovable(true);
-        parent = graph.getDefaultParent();
+        }
 
-        graphComponent = new mxGraphComponent(graph) {
+        timeline.setCellsMovable(
+                true);
+        parent = timeline.getDefaultParent();
+
+        graphComponent = new mxGraphComponent(timeline) {
             @Override
             protected JViewport createViewport() {
                 JViewport viewport = super.createViewport();
@@ -151,25 +147,12 @@ public class CamillaTimelineCanvas extends JPanel implements CamillaCanvas {
         };
         rubberband = new mxRubberband(graphComponent);
 
-        graph.getModel()
+        timeline.getModel()
                 .addListener(mxEvent.CHANGE, new mxIEventListener() {
                     @Override
                     public void invoke(Object sender, mxEventObject evt
                     ) {
-//                for (Object change : ((List<mxAtomicGraphModelChange>) evt.getProperty("changes"))) {
-//                    if (change instanceof mxChildChange && ((mxChildChange) change).getPrevious() == null) {
-//                        Object cell = ((mxChildChange) change).getChild();
-//                        if (graph.getModel().isEdge(cell)) {
-//                            Object source = graph.getModel().getTerminal(cell, true);
-//                            Object target = graph.getModel().getTerminal(cell, false);
-//                            if (source == null || target == null) {
-//                                ((mxCell) cell).setStyle("strokeColor=red");
-//                            }
-//                        }
-//                    }
-//                }
-                        CamillaUtils.saveGraphXml(graph, this.getClass().getName());
-//                        saveGraphXml();
+                        CamillaUtils.saveGraphXml(timeline, this.getClass().getName());
                     }
                 }
                 );
@@ -199,13 +182,13 @@ public class CamillaTimelineCanvas extends JPanel implements CamillaCanvas {
                                 JMenuItem addItem = new JMenuItem("Add Note");
                                 addItem.addActionListener(new ActionListener() {
                                     public void actionPerformed(ActionEvent ae) {
-                                        graph.getModel().beginUpdate();
+                                        timeline.getModel().beginUpdate();
                                         try {
                                             // Add a new vertex at the right-click location with a black border and a white background
-                                            graph.insertVertex(parent, null, "", e.getX(), e.getY(), 80, 30,
+                                            timeline.insertVertex(parent, null, "", e.getX(), e.getY(), 80, 30,
                                                     "shape=rectangle;strokeColor=black;fillColor=white;");
                                         } finally {
-                                            graph.getModel().endUpdate();
+                                            timeline.getModel().endUpdate();
                                         }
                                     }
                                 });
@@ -294,10 +277,10 @@ public class CamillaTimelineCanvas extends JPanel implements CamillaCanvas {
 
                     Document document = mxXmlUtils.parseXml(graphXml);
                     codec = new mxCodec(document);
-                    graph = new CamillaTimelineGraph();
-                    codec.decode(document.getDocumentElement(), graph.getModel());
+                    timeline = new CamillaTimelineGraph();
+                    codec.decode(document.getDocumentElement(), timeline.getModel());
 
-                    return graph;
+                    return timeline;
                 }
             }
         } catch (SQLException e) {
@@ -373,7 +356,7 @@ public class CamillaTimelineCanvas extends JPanel implements CamillaCanvas {
                 Point dropPoint = support.getDropLocation().getDropPoint();
 
                 // Cast arrowEdge to mxCell and get its geometry
-                mxCell edgeCell = (mxCell) arrowEdge;
+                mxCell edgeCell = CamillaUtils.getCellByName(timeline, "arrowEdge");
                 mxGeometry edgeGeometry = edgeCell.getGeometry();
 
                 // Generate a random x position along the arrow edge for the edge control point
@@ -382,23 +365,23 @@ public class CamillaTimelineCanvas extends JPanel implements CamillaCanvas {
                 double maxX = minX + edgeGeometry.getWidth();
                 double controlPointX = minX + (maxX - minX) * rand.nextDouble();
 
-                graph.getModel().beginUpdate();
+                timeline.getModel().beginUpdate();
                 try {
                     File imageFile = new File(saveImageToTempFile(node));
                     String imageUrl = imageFile.toURI().toURL().toString();
                     String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=0;";
                     // Create a new vertex at the drop point
-                    Object newVertex = graph.insertVertex(graph.getDefaultParent(), null, node.getDisplayName(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+                    Object newVertex = timeline.insertVertex(timeline.getDefaultParent(), null, node.getDisplayName(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
 
                     // Create a new edge from the new vertex to the arrowEdge
-                    Object newEdge = graph.insertEdge(graph.getDefaultParent(), null, "", newVertex, arrowEdge);
+                    Object newEdge = timeline.insertEdge(timeline.getDefaultParent(), null, "", newVertex, arrowEdge);
 
                     // Set the control point for the new edge
-                    mxGeometry edgeGeometryForNewEdge = graph.getModel().getGeometry(newEdge);
+                    mxGeometry edgeGeometryForNewEdge = timeline.getModel().getGeometry(newEdge);
                     edgeGeometryForNewEdge.setTerminalPoint(new mxPoint(controlPointX, edgeGeometry.getY()), false);
-                    graph.getModel().setGeometry(newEdge, edgeGeometryForNewEdge);
+                    timeline.getModel().setGeometry(newEdge, edgeGeometryForNewEdge);
                 } finally {
-                    graph.getModel().endUpdate();
+                    timeline.getModel().endUpdate();
                 }
 
                 return true;
