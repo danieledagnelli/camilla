@@ -3,10 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/camilla-plugin-git/Camilla/src/org/jfree/chart/renderer/xy/ClusteredXYBarRenderer.java</file>
-            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/Camilla.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaTimelineCanvas.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaGraphModel.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaTimelineGraph.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaGraphCanvas.java</file>
             <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaUtils.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaVertex.java</file>
             <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaCanvas.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaTimelineModel.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaOutlineView.java</file>
         </group>
     </open-files>
 </project-private>

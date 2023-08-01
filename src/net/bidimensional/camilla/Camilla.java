@@ -1400,7 +1400,7 @@ public class Camilla extends AbstractDataResultViewer {
         exportCSVButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
         outlineView = new CamillaOutlineView(Camilla.FIRST_COLUMN_LABEL);
-        canvasPanel = new CamillaCanvas();
+        canvasPanel = new CamillaGraphCanvas();
 
         pageLabel.setText(org.openide.util.NbBundle.getMessage(Camilla.class, "DataResultViewerTable.pageLabel.text")); // NOI18N
 
@@ -1460,7 +1460,7 @@ public class Camilla extends AbstractDataResultViewer {
         exportCSVButton.setToolTipText(org.openide.util.NbBundle.getMessage(Camilla.class, "CamillaViewerTable.exportPNGButton.text"));
         exportCSVButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveGraphToPNG(evt);
+                CamillaUtils.saveGraphToPNG(canvasPanel);
             }
         });
 
@@ -1562,29 +1562,29 @@ public class Camilla extends AbstractDataResultViewer {
         }
     }
 
-    public void saveGraphToPNG(java.awt.event.ActionEvent evt) {
-        mxGraphComponent graphComponent = ((CamillaCanvas) canvasPanel).getGraphComponent();
-        // Create a BufferedImage of the graph
-        BufferedImage image = mxCellRenderer.createBufferedImage(graphComponent.getGraph(), null, 1, Color.WHITE, true, null);
-
-        // Create a file chooser
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Specify a file to save");
-
-        // Show save dialog; this method does not return until the dialog is closed
-        int userSelection = fileChooser.showSaveDialog(graphComponent);
-
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            File fileToSave = fileChooser.getSelectedFile();
-
-            // Write the BufferedImage to a file
-            try {
-                ImageIO.write(image, "PNG", fileToSave);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    public void saveGraphToPNG(java.awt.event.ActionEvent evt) {
+//        mxGraphComponent graphComponent = ((CamillaCanvas) canvasPanel).getGraphComponent();
+//        // Create a BufferedImage of the graph
+//        BufferedImage image = mxCellRenderer.createBufferedImage(graphComponent.getGraph(), null, 1, Color.WHITE, true, null);
+//
+//        // Create a file chooser
+//        JFileChooser fileChooser = new JFileChooser();
+//        fileChooser.setDialogTitle("Specify a file to save");
+//
+//        // Show save dialog; this method does not return until the dialog is closed
+//        int userSelection = fileChooser.showSaveDialog(graphComponent);
+//
+//        if (userSelection == JFileChooser.APPROVE_OPTION) {
+//            File fileToSave = fileChooser.getSelectedFile();
+//
+//            // Write the BufferedImage to a file
+//            try {
+//                ImageIO.write(image, "PNG", fileToSave);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     private void outlineViewComponentResized(java.awt.event.ComponentEvent evt) {
         // TODO add your handling code here:

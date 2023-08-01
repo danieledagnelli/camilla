@@ -1460,7 +1460,7 @@ public class CamillaTimeline extends AbstractDataResultViewer {
         exportCSVButton.setToolTipText(org.openide.util.NbBundle.getMessage(CamillaTimeline.class, "CamillaViewerTable.exportPNGButton.text"));
         exportCSVButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveGraphToPNG(evt);
+                CamillaUtils.saveGraphToPNG(canvasPanel);
             }
         });
 
