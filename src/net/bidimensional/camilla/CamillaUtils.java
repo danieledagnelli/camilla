@@ -11,84 +11,62 @@ import java.awt.image.BufferedImage;
 import java.beans.BeanInfo;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.jfree.data.json.impl.JSONArray;
-import org.jfree.data.json.impl.JSONObject;
+import net.bidimensional.camilla.graphbuilder.CamillaEntityGraph;
+import net.bidimensional.camilla.timelinebuilder.CamillaTimelineGraph;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.autopsy.casemodule.NoCurrentCaseException;
+import org.w3c.dom.Document;
 
+@SuppressWarnings("StaticNonFinalUsedInInitialization")
 public class CamillaUtils {
 
-    private static final String GPT_API_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String API_KEY = "TBD";
+    private static Case currentCase;
+    private static String caseDatabasePath;
+    private static String autopsyDbPath;
+    private static mxCodec codec = new mxCodec();
+    private static String graphXml;
+    private static String url;
+    private static Connection conn;
+    private static mxGraph graph;
+    private static CamillaTimelineGraph timelineGraph;
 
-    public static String getResponseFromGpt4(String xmlInput) throws IOException {
-        JSONObject systemMessage = new JSONObject();
-        systemMessage.put("role", "system");
-        systemMessage.put("content", "This is an XML representing graph of relationships for a Digital Forensic investigation case. Write a report based on it:");
+    private static Statement stmt;
 
-        JSONObject userMessage = new JSONObject();
-        userMessage.put("role", "user");
-        userMessage.put("content", xmlInput);
+    static {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            currentCase = Case.getCurrentCaseThrows();
+            caseDatabasePath = currentCase.getCaseDirectory();
+            autopsyDbPath = caseDatabasePath + "\\autopsy.db";
+            url = "jdbc:sqlite:" + autopsyDbPath;
+            conn = DriverManager.getConnection(url);
 
-        JSONArray messages = new JSONArray();
-        messages.add(systemMessage.toString());
-        messages.add(userMessage.toString());
+            stmt = conn.createStatement();
+            // Create a new table to store your graphXml if it doesn't already exist
+            stmt.execute("CREATE TABLE IF NOT EXISTS graphXMLdata (id INTEGER PRIMARY KEY, XML TEXT)");
+            stmt.execute("CREATE TABLE IF NOT EXISTS timelineXMLdata (id INTEGER PRIMARY KEY, XML TEXT)");
 
-        JSONObject jsonPayload = new JSONObject();
-        jsonPayload.put("messages", messages.toString());
-        jsonPayload.put("max_tokens", 200);
-        jsonPayload.put("model", "gpt-4");
-
-        URL url = new URL(GPT_API_URL);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-        connection.setRequestProperty("Authorization", "Bearer " + API_KEY);
-        connection.setDoOutput(true);
-
-        try ( DataOutputStream writer = new DataOutputStream(connection.getOutputStream())) {
-            writer.write(jsonPayload.toString().getBytes(StandardCharsets.UTF_8));
-            writer.flush();
+        } catch (ClassNotFoundException | NoCurrentCaseException | SQLException ex) {
+            Exceptions.printStackTrace(ex);
         }
-
-        int status = connection.getResponseCode();
-
-        BufferedReader reader;
-        if (status > 299) {
-            reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-        } else {
-            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        }
-
-        String line;
-        StringBuilder response = new StringBuilder();
-
-        while ((line = reader.readLine()) != null) {
-            response.append(line);
-        }
-        reader.close();
-
-        if (status > 299) {
-            throw new RuntimeException("HTTP response error: " + status + " - " + response.toString());
-        }
-
-        return response.toString();
     }
 
-    public static String saveImageToTempFile(Node n) throws IOException {
+    public CamillaUtils() {
+
+    }
+
+    public static String saveImageToTempFile(Node n) {
         String imageClass;
         BufferedImage outputImage;
         File tempFile = null;
@@ -105,9 +83,7 @@ public class CamillaUtils {
 
             // Return the path of the temporary file
             return tempFile.getAbsolutePath();
-        } catch (IllegalAccessException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (InvocationTargetException ex) {
+        } catch (IllegalAccessException | InvocationTargetException | IOException ex) {
             Exceptions.printStackTrace(ex);
         }
         return tempFile.getAbsolutePath();
@@ -138,65 +114,46 @@ public class CamillaUtils {
                 fileToSave = new File(filePath);
             }
 
-            // Write the BufferedImage to a file
             try {
+                // Write the BufferedImage to a file
                 ImageIO.write(image, "PNG", fileToSave);
-
-                // Open the save directory and highlight the file in Windows
                 Runtime.getRuntime().exec("explorer.exe /select," + filePath.replace("/", "\\"));
 
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
             }
+
+            // Open the save directory and highlight the file in Windows
         }
     }
 
-    public static void saveGraphXml(mxGraph graph, String className) {
-        mxCodec codec = new mxCodec();
+    synchronized public static void saveVisualization(VisualizationType type, mxGraph graph) {
 
-        String tablename = null;
-
-        if (className.contains("Graph")) {
-            tablename = "graph";
-        };
-        if (className.contains("Timeline")) {
-            tablename = "timeline";
+        String tablename;
+        if (null == type) {
+            // throw an exception or handle default case
+            throw new IllegalArgumentException("Invalid type: " + type);
+        } else {
+            switch (type) {
+                case ENTITY:
+                    tablename = "graphXMLdata";
+                    break;
+                case TIMELINE:
+                    tablename = "timelineXMLdata";
+                    break;
+                default:
+                    // throw an exception or handle default case
+                    throw new IllegalArgumentException("Invalid type: " + type);
+            }
         }
-
+        graphXml = mxXmlUtils.getXml(codec.encode(graph.getModel()));
+        System.out.println("Saving: " + graphXml);
         try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException ex) {
+            stmt.execute("INSERT OR REPLACE INTO " + tablename + "(id, XML) VALUES (1, '" + graphXml + "')");
+        } catch (SQLException ex) {
             Exceptions.printStackTrace(ex);
         }
 
-        String graphXml = mxXmlUtils.getXml(codec.encode(graph.getModel()));
-        // Get the current case
-        Case currentCase;
-        try {
-            currentCase = Case.getCurrentCaseThrows();
-        } catch (NoCurrentCaseException e) {
-            System.err.println("No current case: " + e.getMessage());
-            return;
-        }
-
-//        // Get the case database path
-        String caseDatabasePath = currentCase.getCaseDirectory();
-        String autopsyDbPath = caseDatabasePath + "\\autopsy.db";
-//
-        String url = "jdbc:sqlite:" + autopsyDbPath;
-        try ( Connection conn = DriverManager.getConnection(url)) {
-            if (conn != null) {
-                Statement stmt = conn.createStatement();
-
-                // Create a new table to store your graphXml if it doesn't already exist
-                stmt.execute("CREATE TABLE IF NOT EXISTS " + tablename + "_XmlData (id INTEGER PRIMARY KEY, graphXml TEXT)");
-
-                // Replace '1' with a suitable ID for the graphXml
-                stmt.execute("INSERT OR REPLACE INTO " + tablename + "_XmlData (id, graphXml) VALUES (1, '" + graphXml + "')");
-            }
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
     }
 
     public static mxCell getCellByName(mxGraph graph, String name) {
@@ -217,4 +174,52 @@ public class CamillaUtils {
 
         return null;
     }
+
+    public static mxGraph loadVisualization(VisualizationType type) {
+        String tablename;
+        if (null == type) {
+            // throw an exception or handle default case
+            throw new IllegalArgumentException("Invalid type: " + type);
+        } else {
+            switch (type) {
+                case ENTITY:
+                    tablename = "graphXMLdata";
+                    break;
+                case TIMELINE:
+                    tablename = "timelineXMLdata";
+                    break;
+                default:
+                    // throw an exception or handle default case
+                    throw new IllegalArgumentException("Invalid type: " + type);
+            }
+        }
+
+        String selectStatement = "SELECT XML FROM " + tablename + " WHERE id = 1";
+        try {
+            stmt = conn.createStatement();
+            // Replace '1' with the ID used to save the graphXml
+            ResultSet resultSet = stmt.executeQuery(selectStatement);
+            if (resultSet.next()) {
+                graphXml = resultSet.getString("XML");
+                System.out.println("Load: " + graphXml);
+
+                Document document = mxXmlUtils.parseXml(graphXml);
+                codec = new mxCodec(document);
+                switch (type) {
+                    case ENTITY:
+                        graph = new CamillaEntityGraph();
+                        break;
+                    case TIMELINE:
+                        graph = new CamillaTimelineGraph();
+                        break;
+                }
+                codec.decode(document.getDocumentElement(), graph.getModel());
+                return graph;
+            }
+        } catch (SQLException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return null;
+    }
+
 }

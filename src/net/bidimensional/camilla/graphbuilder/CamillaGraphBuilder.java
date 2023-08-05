@@ -136,7 +136,6 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
     private final TableListener outlineViewListener;
     private final IconRendererTableListener iconRendererListener;
     private Node rootNode;
-    
 
     /**
      * Multiple nodes may have been visited in the context of this
@@ -203,16 +202,7 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
         canvasPanel.repaint();
         initializePagingSupport();
 
-        /*
-         * Disable the CSV export button for the common properties results
-         */
-//        if (this instanceof org.sleuthkit.autopsy.commonpropertiessearch.CommonAttributesSearchResultsViewerTable) {
-//            exportCSVButton.setEnabled(false);
-//        }
-
-        /*
-         * Configure the child OutlineView (explorer view) component.
-         */
+       
         outlineView.setAllowedDragActions(DnDConstants.ACTION_COPY_OR_MOVE);
 
         outline = outlineView.getOutline();
@@ -1458,10 +1448,8 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
                 CamillaUtils.saveGraphToPNG(canvasPanel);
             }
         });
-        
-        
-        //TODO: Implement Clear Graph (and Timeline) button
 
+        //TODO: Implement Clear Graph (and Timeline) button
         outlineView.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
                 outlineViewComponentResized(evt);
@@ -1474,7 +1462,7 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
         jSplitPane1.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                
+
                 int parentWidth = jSplitPane1.getSize().width;
                 int dividerLocation = (int) (parentWidth * 0.1); // 10% of the parent component's width
                 jSplitPane1.setDividerLocation(dividerLocation);
@@ -1484,7 +1472,6 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
 // Prevent the divider from being moved
         BasicSplitPaneUI ui = (BasicSplitPaneUI) jSplitPane1.getUI();
         ui.getDivider().setEnabled(false);
-
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -1559,7 +1546,6 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
             MessageNotifyUtil.Message.info(Bundle.Camilla_exportCSVButtonActionPerformed_empty());
         }
     }
-
 
     private void outlineViewComponentResized(java.awt.event.ComponentEvent evt) {
         // TODO add your handling code here:

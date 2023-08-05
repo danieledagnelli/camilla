@@ -5,6 +5,7 @@
 package net.bidimensional.camilla.timelinebuilder;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.view.mxGraph;
 
@@ -14,12 +15,63 @@ import com.mxgraph.view.mxGraph;
  */
 public class CamillaTimelineGraph extends mxGraph {
 
-    CamillaTimelineGraph(mxIGraphModel model) {
+    public CamillaTimelineGraph(mxIGraphModel model) {
         super(model);
     }
 
-    CamillaTimelineGraph() {
+    public CamillaTimelineGraph() {
         super();
+    }
+
+    @Override
+    public Object createEdge(Object parent, String id, Object value, Object source, Object target, String style) {
+        // If the target is not null
+        if (target != null) {
+            // Get the source and target cells
+            mxCell sourceCell = (mxCell) source;
+            mxCell targetCell = (mxCell) target;
+
+            // Get the geometry of the source and target cells
+            mxGeometry sourceGeometry = sourceCell.getGeometry();
+            mxGeometry targetGeometry = targetCell.getGeometry();
+
+            // Set the x-coordinate of the target cell to the x-coordinate of the source cell
+            targetGeometry.setX(sourceGeometry.getX());
+            targetCell.setGeometry(targetGeometry);
+        }
+
+        // Call the superclass's createEdge method to create the edge
+        return super.createEdge(parent, id, value, source, target, style);
+    }
+
+    @Override
+    public void cellsMoved(Object[] cells, double dx, double dy, boolean disconnect, boolean constrain) {
+        // Call the superclass's cellsMoved method
+        super.cellsMoved(cells, dx, dy, disconnect, constrain);
+
+        // For each moved cell
+        for (Object cell : cells) {
+            // If the cell is a vertex
+            if (getModel().isVertex(cell)) {
+                // Get all edges connected to the vertex
+                Object[] edges = getEdges(cell);
+
+                // For each edge
+                for (Object edge : edges) {
+                    // Get the source and target cells of the edge
+                    mxCell sourceCell = (mxCell) getModel().getTerminal(edge, true);
+                    mxCell targetCell = (mxCell) getModel().getTerminal(edge, false);
+
+                    // Get the geometry of the source and target cells
+                    mxGeometry sourceGeometry = sourceCell.getGeometry();
+                    mxGeometry targetGeometry = targetCell.getGeometry();
+
+                    // Set the x-coordinate of the target cell to the x-coordinate of the source cell
+                    targetGeometry.setX(sourceGeometry.getX());
+                    getModel().setGeometry(targetCell, targetGeometry);
+                }
+            }
+        }
     }
 
     private boolean isBackgroundArrow(Object cell) {
@@ -51,7 +103,6 @@ public class CamillaTimelineGraph extends mxGraph {
         //if is background arrow, then can't be changed
         return !(isBackgroundArrow(cell) || isBackgroundArrowVertex(cell));
     }
-
 
     @Override
     public boolean isCellSelectable(Object cell) {

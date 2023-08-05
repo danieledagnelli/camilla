@@ -85,6 +85,7 @@ import org.openide.nodes.NodeEvent;
 import org.openide.nodes.NodeListener;
 import org.openide.nodes.NodeMemberEvent;
 import org.openide.nodes.NodeReorderEvent;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.sleuthkit.autopsy.corecomponents.AbstractDataResultViewer;
 import org.sleuthkit.autopsy.corecomponents.DataResultViewerTable;
