@@ -2,6 +2,7 @@ package net.bidimensional.camilla.graphbuilder;
 
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGraphModel;
+import com.mxgraph.swing.handler.mxRubberband;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
@@ -29,6 +30,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import net.bidimensional.camilla.CamillaCanvas;
 import net.bidimensional.camilla.CamillaUtils;
+import net.bidimensional.camilla.CamillaVertex;
 import net.bidimensional.camilla.VisualizationType;
 import org.openide.nodes.Node;
 
@@ -74,6 +76,8 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 return viewport;
             }
         };
+        new mxRubberband(graphComponent);
+
         graph.getModel().addListener(mxEvent.CHANGE, new mxIEventListener() {
             @Override
             public void invoke(Object sender, mxEventObject evt) {
@@ -125,7 +129,10 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 
                                 // If the user confirmed, remove the cell
                                 if (result == JOptionPane.YES_OPTION) {
-                                    graphComponent.getGraph().removeCells(new Object[]{cell});
+//                                    graphComponent.getGraph().removeCells(new Object[]{cell});
+                                    deleteSelectedItems();
+                                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+
                                 }
                             }
                         });
@@ -187,8 +194,13 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 File imageFile = new File(CamillaUtils.saveImageToTempFile(node));
                 String imageUrl = imageFile.toURI().toURL().toString();
                 String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
+                
+                CamillaVertex vertex = new CamillaVertex(node.getPropertySets()[0].getProperties());
+                
                 graph.getModel().beginUpdate();
-                graph.insertVertex(graph.getDefaultParent(), null, node.getDisplayName(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+//                graph.insertVertex(graph.getDefaultParent(), null, node.getDisplayName(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+                graph.insertVertex(graph.getDefaultParent(), null, vertex, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+
                 graph.getModel().endUpdate();
 
                 CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
@@ -197,6 +209,18 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
             } catch (UnsupportedFlavorException | IOException ex) {
                 System.out.println("importData Exception");
                 return false;
+            }
+        }
+    }
+
+    public void deleteSelectedItems() {
+        Object[] selectedCells = graph.getSelectionCells();
+        if (selectedCells != null && selectedCells.length > 0) {
+            graph.getModel().beginUpdate();
+            try {
+                graph.removeCells(selectedCells);
+            } finally {
+                graph.getModel().endUpdate();
             }
         }
     }

@@ -47,10 +47,16 @@ public class CamillaTimelineCanvas extends JPanel implements CamillaCanvas {
         return timeline;
     }
 
+
     public CamillaTimelineCanvas() {
         super();
         setLayout(new BorderLayout());  // Set the layout to BorderLayout
         timeline = (CamillaTimelineGraph) CamillaUtils.loadVisualization(VisualizationType.TIMELINE);
+
+//        JFreeChart timelineChart = createTimelineChart();
+//
+//        // Wrap the chart in a ChartPanel
+//        ChartPanel chartPanel = new ChartPanel(timelineChart);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -200,6 +206,11 @@ public class CamillaTimelineCanvas extends JPanel implements CamillaCanvas {
         graphComponent.setDragEnabled(
                 true);
         this.add(graphComponent, BorderLayout.CENTER);  // Add the component to the center of the layout
+// Add the ChartPanel to the JFrame
+//        this.add(chartPanel, BorderLayout.CENTER);  // Add the component to the center of the layout
+//
+//        repaint();
+//        revalidate();
         this.setBackground(Color.BLACK); // Set the panel background to black
         this.setAutoscrolls(
                 true);

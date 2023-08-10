@@ -8,6 +8,13 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.view.mxGraph;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 /**
  *
@@ -18,6 +25,8 @@ public class CamillaTimelineGraph extends mxGraph {
     public CamillaTimelineGraph(mxIGraphModel model) {
         super(model);
     }
+
+
 
     public CamillaTimelineGraph() {
         super();

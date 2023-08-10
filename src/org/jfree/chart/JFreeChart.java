@@ -102,6 +102,7 @@ import org.jfree.chart.api.VerticalAlignment;
 import org.jfree.chart.internal.Args;
 import org.jfree.chart.internal.PaintUtils;
 import org.jfree.chart.internal.SerialUtils;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.swing.ChartPanel;
 import org.jfree.data.Range;
 
@@ -1636,6 +1637,10 @@ public class JFreeChart implements Drawable, TitleChangeListener,
         chart.progressListeners = new EventListenerList();
         chart.changeListeners = new EventListenerList();
         return chart;
+    }
+
+    public XYPlot getXYPlot() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
 

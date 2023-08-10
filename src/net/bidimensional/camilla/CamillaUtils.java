@@ -72,24 +72,25 @@ public class CamillaUtils {
         File tempFile = null;
         try {
 
-            imageClass = n.getParentNode().getPropertySets()[0].getProperties()[0].getValue().toString().replaceAll(" ", "").toLowerCase();
+            imageClass = n.getDisplayName();
+            outputImage = (BufferedImage) n.getOpenedIcon(BeanInfo.ICON_COLOR_32x32);
             tempFile = File.createTempFile(imageClass, ".png");
-
-            // Cast Image to BufferedImage
-            outputImage = (BufferedImage) n.getIcon(BeanInfo.ICON_COLOR_32x32);
-
-            // Write the image to the temporary file
             ImageIO.write(outputImage, "png", tempFile);
-
             // Return the path of the temporary file
             return tempFile.getAbsolutePath();
-        } catch (IllegalAccessException | InvocationTargetException | IOException ex) {
+        } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
         return tempFile.getAbsolutePath();
 
     }
 
+    //TODO: return the previous version of the graph stored in the db
+    public static mxGraph undoChanges (VisualizationType type) {
+        return null;
+    }
+    
+    
     public static void saveGraphToPNG(JPanel canvas) {
         mxGraphComponent graphComponent = ((CamillaCanvas) canvas).getGraphComponent();
         // Create a BufferedImage of the graph
@@ -126,7 +127,8 @@ public class CamillaUtils {
             // Open the save directory and highlight the file in Windows
         }
     }
-
+    
+//TODO: maintain the history of saves in the DB
     synchronized public static void saveVisualization(VisualizationType type, mxGraph graph) {
 
         String tablename;
@@ -175,6 +177,7 @@ public class CamillaUtils {
         return null;
     }
 
+    //TODO: load the latest saved visualization
     public static mxGraph loadVisualization(VisualizationType type) {
         String tablename;
         if (null == type) {
