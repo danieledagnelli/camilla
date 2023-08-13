@@ -1382,7 +1382,7 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
         pageNextButton = new javax.swing.JButton();
         gotoPageLabel = new javax.swing.JLabel();
         gotoPageTextField = new javax.swing.JTextField();
-        exportCSVButton = new javax.swing.JButton();
+        exportPNGButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
         outlineView = new CamillaOutlineView(CamillaGraphBuilder.FIRST_COLUMN_LABEL);
         canvasPanel = new CamillaGraphCanvas();
@@ -1440,10 +1440,10 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
 // Create a new ImageIcon from the scaled image
         ImageIcon buttonIcon = new ImageIcon(scaledImage);
 // Set the icon of the button and the tooltip text
-        exportCSVButton.setIcon(buttonIcon);
-        exportCSVButton.setText(""); // remove the existing text
-        exportCSVButton.setToolTipText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "CamillaViewerTable.exportPNGButton.text"));
-        exportCSVButton.addActionListener(new java.awt.event.ActionListener() {
+        exportPNGButton.setIcon(buttonIcon);
+        exportPNGButton.setText(""); // remove the existing text
+        exportPNGButton.setToolTipText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "CamillaViewerTable.exportPNGButton.text"));
+        exportPNGButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CamillaUtils.saveGraphToPNG(canvasPanel);
             }
@@ -1495,7 +1495,7 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(gotoPageTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(exportCSVButton))
+                                                .addComponent(exportPNGButton))
                                         .addComponent(jSplitPane1)))
         );
 
@@ -1513,7 +1513,7 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
                                         .addComponent(pageNextButton, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(gotoPageLabel)
                                         .addComponent(gotoPageTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(exportCSVButton))
+                                        .addComponent(exportPNGButton))
                                 .addGap(3, 3, 3)
                                 .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
                                 .addContainerGap())
@@ -1554,7 +1554,7 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
 //        jSplitPane1.setDividerLocation(dividerLocation);
     }
     private javax.swing.JPanel canvasPanel;
-    private javax.swing.JButton exportCSVButton;
+    private javax.swing.JButton exportPNGButton;
     private javax.swing.JLabel gotoPageLabel;
     private javax.swing.JTextField gotoPageTextField;
     private javax.swing.JSplitPane jSplitPane1;

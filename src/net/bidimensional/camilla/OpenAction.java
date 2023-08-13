@@ -1,32 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package net.bidimensional.camilla;
 
-/*
- * Autopsy Forensic Browser
- *
- * Copyright 2015-2019 Basis Technology Corp.
- * Contact: carrier <at> sleuthkit <dot> org
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.logging.Level;
 import javafx.application.Platform;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -42,7 +19,6 @@ import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.CallableSystemAction;
 import org.sleuthkit.autopsy.casemodule.Case;
-import org.sleuthkit.autopsy.casemodule.NoCurrentCaseException;
 import org.sleuthkit.autopsy.core.RuntimeProperties;
 import org.sleuthkit.autopsy.coreutils.Logger;
 
@@ -124,14 +100,14 @@ public final class OpenAction extends CallableSystemAction {
     }
 
     @Override
-    @NbBundle.Messages({"OpenAction.dialogTitle=Image Gallery",
-        "OpenAction.multiUserDialog.Header=Multi-user Image Gallery",
-        "OpenAction.multiUserDialog.ContentText=The Image Gallery updates itself differently for multi-user cases than single user cases. Notably:\n\n"
-        + "If your computer is analyzing a data source, then you will get real-time Image Gallery updates as files are analyzed (hashed, EXIF, etc.). This is the same behavior as a single-user case.\n\n"
-        + "If another computer in your multi-user cluster is analyzing a data source, you will get updates about files on that data source only when you launch Image Gallery, which will cause the local database to be rebuilt based on results from other nodes.",
-        "OpenAction.multiUserDialog.checkBox.text=Don't show this message again.",
-        "OpenAction.noControllerDialog.header=Cannot open Image Gallery",
-        "OpenAction.noControllerDialog.text=An initialization error ocurred.\nPlease see the log for details.",})
+//    @NbBundle.Messages({"OpenAction.dialogTitle=Image Gallery",
+//        "OpenAction.multiUserDialog.Header=Multi-user Image Gallery",
+//        "OpenAction.multiUserDialog.ContentText=The Image Gallery updates itself differently for multi-user cases than single user cases. Notably:\n\n"
+//        + "If your computer is analyzing a data source, then you will get real-time Image Gallery updates as files are analyzed (hashed, EXIF, etc.). This is the same behavior as a single-user case.\n\n"
+//        + "If another computer in your multi-user cluster is analyzing a data source, you will get updates about files on that data source only when you launch Image Gallery, which will cause the local database to be rebuilt based on results from other nodes.",
+//        "OpenAction.multiUserDialog.checkBox.text=Don't show this message again.",
+//        "OpenAction.noControllerDialog.header=Cannot open Image Gallery",
+//        "OpenAction.noControllerDialog.text=An initialization error ocurred.\nPlease see the log for details.",})
     public void performAction() {
 
         Platform.runLater(new Runnable() {
@@ -140,8 +116,8 @@ public final class OpenAction extends CallableSystemAction {
                 JLabel textLabel = new JLabel(
                         "<html><body>"
                                 + "<center><h2><b>CAMILLA</b></h2>"
-                                + "<p><b>C</b>ontextual <b>A</b>rtefact <b>M</b>apping and <b>I</b>nteractive <b>L</b>inking <b>L</b>ayer <b>A</b>nalyzer</p>"
-                                + "<p><i><small>Copyright © 2023</small></i></p>"
+                                + "<p><b>C</b>ontextual <b>A</b>utopsy <b>M</b>apping and <b>I</b>ntegrated <b>L</b>inking <b>L</b>ayer <b>A</b>dd-on</p>"
+                                + "<p><i><small>© 2023 Daniele D'Agnelli</small></i></p>"
                                 + "</center></body></html>"
                 );      // Load the image and create a label for it
                 ImageIcon icon = new ImageIcon(OpenAction.this.getClass().getResource("camilla_26.png"));
@@ -153,55 +129,9 @@ public final class OpenAction extends CallableSystemAction {
                 panel.add(textLabel, BorderLayout.CENTER);
                 // Display the panel in an info dialog
                 JOptionPane.showMessageDialog(null, panel, "About", JOptionPane.PLAIN_MESSAGE);
-                return;
             }
         });
-//            ImageGalleryController controller;
-//            // @@@ This call gets a lock. We shouldn't do this in the UI....
-//            controller = ImageGalleryController.getController(currentCase);
-//
-//            // Display an error if we could not get the controller and return
-//            if (controller == null) {
-//                Alert errorDIalog = new Alert(Alert.AlertType.ERROR);
-//                errorDIalog.initModality(Modality.APPLICATION_MODAL);
-//                errorDIalog.setResizable(true);
-//                errorDIalog.setTitle(Bundle.OpenAction_dialogTitle());
-//                errorDIalog.setHeaderText(Bundle.OpenAction_noControllerDialog_header());
-//                Label errorLabel = new Label(Bundle.OpenAction_noControllerDialog_text());
-//                errorLabel.setMaxWidth(450);
-//                errorLabel.setWrapText(true);
-//                errorDIalog.getDialogPane().setContent(new VBox(10, errorLabel));
-//                GuiUtils.setDialogIcons(errorDIalog);
-//                errorDIalog.showAndWait();
-//                logger.log(Level.SEVERE, "No Image Gallery controller for the current case");  
-//                return;
-//            }
-//
-//            // Make sure the user is aware of Single vs Multi-user behaviors
-//            if (currentCase.getCaseType() == Case.CaseType.MULTI_USER_CASE
-//                    && ImageGalleryPreferences.isMultiUserCaseInfoDialogDisabled() == false) {
-//                Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-//                dialog.initModality(Modality.APPLICATION_MODAL);
-//                dialog.setResizable(true);
-//                dialog.setTitle(Bundle.OpenAction_dialogTitle());
-//                dialog.setHeaderText(Bundle.OpenAction_multiUserDialog_Header());
-//
-//                Label label = new Label(Bundle.OpenAction_multiUserDialog_ContentText());
-//                label.setMaxWidth(450);
-//                label.setWrapText(true);
-//                CheckBox dontShowAgainCheckBox = new CheckBox(Bundle.OpenAction_multiUserDialog_checkBox_text());
-//                dialog.getDialogPane().setContent(new VBox(10, label, dontShowAgainCheckBox));
-//                GuiUtils.setDialogIcons(dialog);
-//
-//                dialog.showAndWait();
-//
-//                if (dialog.getResult() == ButtonType.OK && dontShowAgainCheckBox.isSelected()) {
-//                    ImageGalleryPreferences.setMultiUserCaseInfoDialogDisabled(true);
-//                }
-//            }
-//
-//            checkDBStale(controller);
-//        });
+
     }
 
     @NbBundle.Messages({"OpenAction.openTopComponent.error.message=An error occurred while attempting to open Image Gallery.",

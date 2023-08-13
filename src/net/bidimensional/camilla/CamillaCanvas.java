@@ -13,5 +13,6 @@ import com.mxgraph.swing.mxGraphComponent;
 public interface CamillaCanvas {
 
     public mxGraphComponent getGraphComponent();
+    
 
 }

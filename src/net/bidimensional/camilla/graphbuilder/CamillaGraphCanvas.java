@@ -12,15 +12,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import javax.swing.JComponent;
+import javax.imageio.ImageIO;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -63,6 +63,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                     return true;
                 }
             };
+            CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
         }
         graph.setCellsMovable(true);
         parent = graph.getDefaultParent();
@@ -151,6 +152,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
         this.setBackground(Color.BLACK); // Set the panel background to black
         this.setAutoscrolls(true);
         this.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+
     }
 
     @Override
@@ -160,20 +162,6 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 
     //This custom handler is disabled within the canvas to allow the jgraph drag and drop
     private class CamillaTransferHandler extends TransferHandler {
-
-        @Override
-        protected Transferable createTransferable(JComponent c) {
-            // Get the cell at the mouse location
-            mxCell cell = (mxCell) graphComponent.getCellAt(graphComponent.getMousePosition().x, graphComponent.getMousePosition().y);
-
-            // If the cell is a vertex or an edge, don't start a drag operation
-            if (cell != null && (cell.isVertex() || cell.isEdge())) {
-                return null;
-            }
-
-            // Otherwise, let the superclass handle the creation of the Transferable
-            return super.createTransferable(c);
-        }
 
         @Override
         public boolean canImport(TransferHandler.TransferSupport support) {
@@ -190,17 +178,17 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 System.out.println("Dropped node: " + node.getDisplayName());
                 TransferHandler.DropLocation dropLocation = support.getDropLocation();
                 Point dropPoint = dropLocation.getDropPoint();
-
                 File imageFile = new File(CamillaUtils.saveImageToTempFile(node));
                 String imageUrl = imageFile.toURI().toURL().toString();
-                String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
-                
-                CamillaVertex vertex = new CamillaVertex(node.getPropertySets()[0].getProperties());
-                
-                graph.getModel().beginUpdate();
-//                graph.insertVertex(graph.getDefaultParent(), null, node.getDisplayName(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
-                graph.insertVertex(graph.getDefaultParent(), null, vertex, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+                BufferedImage img = ImageIO.read(imageFile);
+                super.setDragImage(img);
 
+                String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
+
+                CamillaVertex vertex = new CamillaVertex(node);
+
+                graph.getModel().beginUpdate();
+                graph.insertVertex(graph.getDefaultParent(), "", vertex.toString(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
                 graph.getModel().endUpdate();
 
                 CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);

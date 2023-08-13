@@ -4,7 +4,9 @@
  */
 package net.bidimensional.camilla;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import org.openide.nodes.Node;
 import org.openide.nodes.Node.Property;
 import org.openide.util.Exceptions;
 
@@ -12,36 +14,36 @@ import org.openide.util.Exceptions;
  *
  * @author danie
  */
-public class CamillaVertex {
-    
-    private Property[] properties;
-    
-    public CamillaVertex(Property[] properties) {
-        this.properties = properties;
+public class CamillaVertex implements Serializable {
+
+    private final Node node;
+
+    public CamillaVertex(Node n) {
+        this.node = n;
     }
 
-    public Property[] getProperties() {
-        return properties;
+    public Node getNode() {
+        return this.node;
     }
 
-    public void setProperties(Property[] properties) {
-        this.properties = properties;
-    }
+    
     
     @Override
     //TODO: the toString is returned based on the type of the node so that only the relevant informations are displayed
     public String toString() {
-        String v = "";
-        for (Property p : properties) {
-            try {
-                v = v + p.getName() + ": " + p.getValue() + "\n";
-            } catch (IllegalAccessException | InvocationTargetException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-            
-        }
-        return v;
-        
+        return node.getDisplayName();
+//        String v = "";
+//        for (Property p : node.getPropertySets()[0].getProperties()) {
+//            try {
+//                v = v + p.getName() + ": " + p.getValue() + "\n";
+//            } catch (IllegalAccessException | InvocationTargetException ex) {
+//                Exceptions.printStackTrace(ex);
+//            }
+//            
+//        }
+//        // Name is not saved, possible problem with escapes
+//        return v.trim();
+//
     }
-    
+
 }

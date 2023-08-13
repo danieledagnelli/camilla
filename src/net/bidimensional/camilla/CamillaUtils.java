@@ -7,6 +7,8 @@ import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.beans.BeanInfo;
 import java.io.*;
@@ -86,29 +88,38 @@ public class CamillaUtils {
     }
 
     //TODO: return the previous version of the graph stored in the db
-    public static mxGraph undoChanges (VisualizationType type) {
+    public static mxGraph undoChanges(VisualizationType type) {
         return null;
     }
-    
-    
+
     public static void saveGraphToPNG(JPanel canvas) {
         mxGraphComponent graphComponent = ((CamillaCanvas) canvas).getGraphComponent();
+
         // Create a BufferedImage of the graph
-        BufferedImage image = mxCellRenderer.createBufferedImage(graphComponent.getGraph(), null, 1, Color.WHITE, true, null);
+        BufferedImage originalImage = mxCellRenderer.createBufferedImage(graphComponent.getGraph(), null, 1, Color.WHITE, true, null);
+
+        // Create a new image with padding
+        int padding = 50;
+        BufferedImage imageWithPadding = new BufferedImage(originalImage.getWidth() + 2 * padding, originalImage.getHeight() + 2 * padding, originalImage.getType());
+        Graphics2D g = imageWithPadding.createGraphics();
+        g.setColor(Color.WHITE); // Set background color
+        g.fillRect(0, 0, imageWithPadding.getWidth(), imageWithPadding.getHeight());
+        g.drawImage(originalImage, padding, padding, null);
+        g.dispose();
 
         // Create a file chooser
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Specify a file to save");
+
         // Set the file filter to show only PNG files
         FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG files", "png");
         fileChooser.setFileFilter(filter);
 
-        // Show save dialog; this method does not return until the dialog is closed
-        int userSelection = fileChooser.showSaveDialog(graphComponent);
-
+        int userSelection = fileChooser.showSaveDialog(null);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File fileToSave = fileChooser.getSelectedFile();
             String filePath = fileToSave.getAbsolutePath();
+
             // Append .png extension if not present
             if (!filePath.toLowerCase().endsWith(".png")) {
                 filePath += ".png";
@@ -116,18 +127,19 @@ public class CamillaUtils {
             }
 
             try {
-                // Write the BufferedImage to a file
-                ImageIO.write(image, "PNG", fileToSave);
-                Runtime.getRuntime().exec("explorer.exe /select," + filePath.replace("/", "\\"));
+                ImageIO.write(imageWithPadding, "png", fileToSave);
 
+                // Open the newly created file
+                if (Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().open(fileToSave);
+                }
             } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
+                // Handle the exception, e.g., log the error or show a message dialog
+                System.err.println("Error saving or opening PNG file: " + ex.getMessage());
             }
-
-            // Open the save directory and highlight the file in Windows
         }
     }
-    
+
 //TODO: maintain the history of saves in the DB
     synchronized public static void saveVisualization(VisualizationType type, mxGraph graph) {
 

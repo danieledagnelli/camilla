@@ -102,7 +102,7 @@ import org.sleuthkit.autopsy.coreutils.MessageNotifyUtil;
  * construction, but the typical use case is for the result viewer to find the
  * ancestor top component's explorer manager at runtime.
  */
-@ServiceProvider(service = DataResultViewer.class)
+//@ServiceProvider(service = DataResultViewer.class)
 @SuppressWarnings("PMD.SingularField") // UI widgets cause lots of false positives
 public class CamillaTimelineBuilder extends AbstractDataResultViewer {
 

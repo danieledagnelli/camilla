@@ -5,12 +5,13 @@
         <group>
             <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/graphbuilder/CamillaGraphCanvas.java</file>
             <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/timelinebuilder/CamillaTimelineBuilder.java</file>
-            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/timelinebuilder/CamillaTimelineModel.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/com/mxgraph/io/mxObjectCodec.java</file>
             <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaUtils.java</file>
-            <file>file:/C:/camilla-plugin-git/Camilla/src/com/mxgraph/view/mxGraph.java</file>
-            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/timelinebuilder/CamillaTimelineGraph.java</file>
-            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/timelinebuilder/CamillaTimelineCanvas.java</file>
-            <file>file:/C:/camilla-plugin-git/Camilla/src/com/mxgraph/io/mxCodec.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaVertex.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/graphbuilder/CamillaGraphBuilder.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/OpenAction.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/graphbuilder/CamillaGraphModel.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/graphbuilder/CamillaEntityGraph.java</file>
         </group>
     </open-files>
 </project-private>
