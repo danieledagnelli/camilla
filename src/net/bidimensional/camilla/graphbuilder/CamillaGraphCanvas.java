@@ -36,7 +36,10 @@ import net.bidimensional.camilla.CamillaCanvas;
 import net.bidimensional.camilla.CamillaUtils;
 import net.bidimensional.camilla.CamillaVertex;
 import net.bidimensional.camilla.VisualizationType;
+import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
+import org.sleuthkit.autopsy.corecomponents.TableFilterNode;
+import org.sleuthkit.autopsy.directorytree.DirectoryTreeTopComponent;
 
 public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 
@@ -93,9 +96,13 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 Object cellObject = graphComponent.getCellAt(e.getX(), e.getY());
                 if (cellObject instanceof mxCell) {
                     mxCell cell = (mxCell) cellObject;
+                    handleVertexSelection(cell);
+//TODO: look here
                     if (cell.isVertex()) {
-                        handleVertexSelection(cell);
-
+                        System.out.println("Click: " + ((TableFilterNode) (selectedVertex.getNode())).getDisplayName());
+                                ExplorerManager em = DirectoryTreeTopComponent.findInstance().getExplorerManager();
+                        System.out.println(em.getSelectedNodes());
+                                Node[] selectedNode = em.getSelectedNodes();
                     }
                 }
             }
@@ -264,14 +271,16 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
         public boolean canImport(TransferHandler.TransferSupport support) {
             // Only accept the drop if the data being transferred is a Node
             // or if the dragged component is the graph component
-            return support.isDataFlavorSupported(new DataFlavor(Node.class, "Node"));
+            return (support.isDataFlavorSupported(new DataFlavor(Node.class, "Node")) || support.isDataFlavorSupported(new DataFlavor(TableFilterNode.class, "TableFilterNode")));
         }
 
         @Override
         public boolean importData(TransferHandler.TransferSupport support) {
             try {
                 // Get the Node
+//                TableFilterNode; -> this is the actual type, check here if i can enable selection
                 Node node = (Node) support.getTransferable().getTransferData(new DataFlavor(Node.class, "Node"));
+//                TableFilterNode tfnode = (TableFilterNode) support.getTransferable().getTransferData(new DataFlavor(Node.class, "Node"));
                 System.out.println("Dropped node: " + node.getDisplayName());
                 TransferHandler.DropLocation dropLocation = support.getDropLocation();
                 Point dropPoint = dropLocation.getDropPoint();
@@ -289,7 +298,10 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 v = graph.insertVertex(graph.getDefaultParent(), null, vertex.toString(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
                 graph.getModel().endUpdate();
 
+                // I need to save only the name before saving
+                setSelectedVertex(vertex);
                 CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+                //TODO: restore this
                 ((mxCell) v).setValue(vertex);
 
                 return true;
