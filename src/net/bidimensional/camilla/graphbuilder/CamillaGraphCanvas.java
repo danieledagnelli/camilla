@@ -10,6 +10,7 @@ import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.view.mxGraph;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -21,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -28,6 +30,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import net.bidimensional.camilla.CamillaCanvas;
 import net.bidimensional.camilla.CamillaUtils;
 import net.bidimensional.camilla.CamillaVertex;
@@ -39,9 +43,14 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
     private CamillaEntityGraph graph;
     private Object parent;
     private mxGraphComponent graphComponent;
+    private CamillaVertex selectedVertex;
 
     public mxGraph getGraph() {
         return graph;
+    }
+
+    public void setSelectedVertex(CamillaVertex vertex) {
+        this.selectedVertex = vertex;
     }
 
     public CamillaGraphCanvas() {
@@ -77,6 +86,20 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 return viewport;
             }
         };
+        // Create and add the mouse listener
+        graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                Object cellObject = graphComponent.getCellAt(e.getX(), e.getY());
+                if (cellObject instanceof mxCell) {
+                    mxCell cell = (mxCell) cellObject;
+                    if (cell.isVertex()) {
+                        handleVertexSelection(cell);
+
+                    }
+                }
+            }
+        });
         new mxRubberband(graphComponent);
 
         graph.getModel().addListener(mxEvent.CHANGE, new mxIEventListener() {
@@ -120,7 +143,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 
                         // If the click was on a vertex or an edge, offer to delete
                     } else if (cell instanceof mxCell && (((mxCell) cell).isVertex() || ((mxCell) cell).isEdge())) {
-                        JMenuItem deleteItem = new JMenuItem("Delete");
+                        JMenuItem deleteItem = new JMenuItem("Delete Node");
                         deleteItem.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent ae) {
                                 // Confirm deletion
@@ -139,6 +162,70 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                         });
 
                         menu.add(deleteItem);
+
+//                        JMenuItem showMenu = new JMenuItem("Show Menu");
+//                        showMenu.addActionListener(new ActionListener() {
+//                            public void actionPerformed(ActionEvent ae) {
+//                                System.out.println("Showing properties");
+//                                Object cellObject = graphComponent.getCellAt(e.getX(), e.getY());
+//                                if (cellObject instanceof mxCell) {
+//                                    mxCell cell = (mxCell) cellObject;
+//                                    Object userObject = cell.getValue();
+//                                    if (userObject instanceof CamillaVertex) {
+//                                        CamillaVertex vertex = (CamillaVertex) userObject;
+//
+//                                        vertex.getNode().getContextMenu().show(graphComponent.getGraphControl(), e.getX(), e.getY());
+//                                    }
+//                                }
+//                            }
+//                        });
+//                        menu.add(showMenu);
+                        JMenu showMenu = new JMenu("Actions");
+                        showMenu.addMenuListener(new MenuListener() {
+                            @Override
+                            public void menuSelected(MenuEvent e) {
+                                System.out.println("menu selected"); // Debugging
+                                showMenu.removeAll();
+
+                                if (selectedVertex != null) {
+                                    System.out.println("selectedVertex is not null"); // Debugging
+                                    JPopupMenu contextMenu = selectedVertex.getNode().getContextMenu();
+                                    int count = contextMenu.getComponentCount();
+                                    System.out.println("contextMenu count: " + count); // Debugging
+                                    for (Component component : contextMenu.getComponents()) {
+                                        if (component instanceof JMenuItem) {
+                                            showMenu.add((JMenuItem) component);
+                                        }
+                                    }
+//                                    for (int i = 0; i < count; i++) {
+//                                        Component component = contextMenu.getComponent(i);
+//                                        if (component instanceof JMenuItem) {
+//                                            System.out.println("Adding submenu item"); // Debugging
+//                                            showMenu.add((JMenuItem) component);
+//                                        }
+//                                    }
+
+                                    // Force the menu to revalidate and repaint
+                                    showMenu.revalidate();
+                                    showMenu.repaint();
+                                } else {
+                                    System.out.println("selectedVertex is null"); // Debugging
+                                }
+                            }
+
+                            // ... other methods ...
+                            @Override
+                            public void menuDeselected(MenuEvent e) {
+//                                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                            }
+
+                            @Override
+                            public void menuCanceled(MenuEvent e) {
+//                                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                            }
+                        });
+                        menu.add(showMenu);
+
                     }
 
                     // Show the popup menu
@@ -158,6 +245,16 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
     @Override
     public mxGraphComponent getGraphComponent() {
         return graphComponent;
+    }
+
+    public void handleVertexSelection(Object cellObject) {
+        if (cellObject instanceof mxCell) {
+            mxCell cell = (mxCell) cellObject;
+            Object userObject = cell.getValue();
+            if (userObject instanceof CamillaVertex) {
+                selectedVertex = (CamillaVertex) userObject;
+            }
+        }
     }
 
     //This custom handler is disabled within the canvas to allow the jgraph drag and drop
@@ -186,12 +283,14 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
 
                 CamillaVertex vertex = new CamillaVertex(node);
+                Object v;
 
                 graph.getModel().beginUpdate();
-                graph.insertVertex(graph.getDefaultParent(), "", vertex.toString(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+                v = graph.insertVertex(graph.getDefaultParent(), null, vertex.toString(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
                 graph.getModel().endUpdate();
 
                 CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+                ((mxCell) v).setValue(vertex);
 
                 return true;
             } catch (UnsupportedFlavorException | IOException ex) {

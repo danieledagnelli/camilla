@@ -228,7 +228,10 @@ public class CamillaUtils {
                         graph = new CamillaTimelineGraph();
                         break;
                 }
+                System.out.println("BEFORE DECODE");
                 codec.decode(document.getDocumentElement(), graph.getModel());
+                System.out.println("AFTER DECODE");
+
                 return graph;
             }
         } catch (SQLException ex) {

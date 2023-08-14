@@ -202,7 +202,6 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
         canvasPanel.repaint();
         initializePagingSupport();
 
-       
         outlineView.setAllowedDragActions(DnDConstants.ACTION_COPY_OR_MOVE);
 
         outline = outlineView.getOutline();
@@ -1384,6 +1383,9 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
         gotoPageTextField = new javax.swing.JTextField();
         exportPNGButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
+        jSplitPane1.setEnabled(true); // Ensure that the split pane is enabled
+        jSplitPane1.setDividerSize(10); // Set the divider size to 10 pixels (or any value that suits your design)
+
         outlineView = new CamillaOutlineView(CamillaGraphBuilder.FIRST_COLUMN_LABEL);
         canvasPanel = new CamillaGraphCanvas();
 
