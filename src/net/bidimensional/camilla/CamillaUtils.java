@@ -161,7 +161,7 @@ public class CamillaUtils {
             }
         }
         graphXml = mxXmlUtils.getXml(codec.encode(graph.getModel()));
-        System.out.println("Saving: " + graphXml);
+//        System.out.println("Saving: " + graphXml);
         try {
             stmt.execute("INSERT OR REPLACE INTO " + tablename + "(id, XML) VALUES (1, '" + graphXml + "')");
         } catch (SQLException ex) {

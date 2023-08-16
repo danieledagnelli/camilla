@@ -36,10 +36,9 @@ import net.bidimensional.camilla.CamillaCanvas;
 import net.bidimensional.camilla.CamillaUtils;
 import net.bidimensional.camilla.CamillaVertex;
 import net.bidimensional.camilla.VisualizationType;
-import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
 import org.sleuthkit.autopsy.corecomponents.TableFilterNode;
-import org.sleuthkit.autopsy.directorytree.DirectoryTreeTopComponent;
+import org.sleuthkit.datamodel.AbstractContent;
 
 public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 
@@ -63,17 +62,17 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
         graph = (CamillaEntityGraph) CamillaUtils.loadVisualization(VisualizationType.ENTITY);
         if (graph == null) {
             graph = new CamillaEntityGraph(new mxGraphModel()) {
-                @Override
-                public boolean isCellMovable(Object cell) {
-                    if (cell instanceof mxCell) {
-                        mxCell mxCell = (mxCell) cell;
-                        // Add your conditions here based on the mxCell object
-                        // For example, to make a specific vertex immovable, you could do:
-                        // if (mxCell.getValue().equals("My Vertex")) return false;
-                    }
-//                return super.isCellMovable(cell);
-                    return true;
-                }
+//                @Override
+//                public boolean isCellMovable(Object cell) {
+//                    if (cell instanceof mxCell) {
+//                        mxCell mxCell = (mxCell) cell;
+//                        // Add your conditions here based on the mxCell object
+//                        // For example, to make a specific vertex immovable, you could do:
+//                        // if (mxCell.getValue().equals("My Vertex")) return false;
+//                    }
+////                return super.isCellMovable(cell);
+//                    return true;
+//                }
             };
             CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
         }
@@ -97,12 +96,9 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 if (cellObject instanceof mxCell) {
                     mxCell cell = (mxCell) cellObject;
                     handleVertexSelection(cell);
-//TODO: look here
                     if (cell.isVertex()) {
-                        System.out.println("Click: " + ((TableFilterNode) (selectedVertex.getNode())).getDisplayName());
-                                ExplorerManager em = DirectoryTreeTopComponent.findInstance().getExplorerManager();
-                        System.out.println(em.getSelectedNodes());
-                                Node[] selectedNode = em.getSelectedNodes();
+//                        System.out.println("Click: " + ((TableFilterNode) (selectedVertex.getNode())).getDisplayName());
+
                     }
                 }
             }
@@ -112,6 +108,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
         graph.getModel().addListener(mxEvent.CHANGE, new mxIEventListener() {
             @Override
             public void invoke(Object sender, mxEventObject evt) {
+
                 CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
 
             }
@@ -170,23 +167,6 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 
                         menu.add(deleteItem);
 
-//                        JMenuItem showMenu = new JMenuItem("Show Menu");
-//                        showMenu.addActionListener(new ActionListener() {
-//                            public void actionPerformed(ActionEvent ae) {
-//                                System.out.println("Showing properties");
-//                                Object cellObject = graphComponent.getCellAt(e.getX(), e.getY());
-//                                if (cellObject instanceof mxCell) {
-//                                    mxCell cell = (mxCell) cellObject;
-//                                    Object userObject = cell.getValue();
-//                                    if (userObject instanceof CamillaVertex) {
-//                                        CamillaVertex vertex = (CamillaVertex) userObject;
-//
-//                                        vertex.getNode().getContextMenu().show(graphComponent.getGraphControl(), e.getX(), e.getY());
-//                                    }
-//                                }
-//                            }
-//                        });
-//                        menu.add(showMenu);
                         JMenu showMenu = new JMenu("Actions");
                         showMenu.addMenuListener(new MenuListener() {
                             @Override
@@ -204,13 +184,6 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                                             showMenu.add((JMenuItem) component);
                                         }
                                     }
-//                                    for (int i = 0; i < count; i++) {
-//                                        Component component = contextMenu.getComponent(i);
-//                                        if (component instanceof JMenuItem) {
-//                                            System.out.println("Adding submenu item"); // Debugging
-//                                            showMenu.add((JMenuItem) component);
-//                                        }
-//                                    }
 
                                     // Force the menu to revalidate and repaint
                                     showMenu.revalidate();
@@ -289,21 +262,46 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 BufferedImage img = ImageIO.read(imageFile);
                 super.setDragImage(img);
 
-                String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
-
+                AbstractContent ac;
+                long artefactID = -1;
+                Node artefactNode;
                 CamillaVertex vertex = new CamillaVertex(node);
-                Object v;
-
-                graph.getModel().beginUpdate();
-                v = graph.insertVertex(graph.getDefaultParent(), null, vertex.toString(), dropPoint.getX(), dropPoint.getY(), 80, 30, style);
-                graph.getModel().endUpdate();
-
-                // I need to save only the name before saving
+                Object insertedVertex;
+                String vertexName = vertex.getNode().getDisplayName(); // should be vertex.displayname
+                String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
                 setSelectedVertex(vertex);
-                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-                //TODO: restore this
-                ((mxCell) v).setValue(vertex);
+                if (node.getLookup().lookup(Object.class) instanceof AbstractContent) {
+                    ac = (AbstractContent) node.getLookup().lookup(Object.class);
+                    artefactID = ac.getId();
 
+                }
+                graph.getModel().beginUpdate();
+                String artefactIDstring = null;
+
+                if (artefactID != -1L) {
+                    artefactIDstring = String.valueOf(artefactID);
+                }
+
+                insertedVertex = graph.insertVertex(graph.getDefaultParent(), artefactIDstring, vertexName, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+                graph.getModel().endUpdate();             
+                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+                ((mxCell) insertedVertex).setValue(vertex);
+
+//                if (node.getLookup().lookup(Object.class) instanceof AbstractContent) {
+//                    ac = (AbstractContent) node.getLookup().lookup(Object.class);
+//                    artefactID = ac.getId();
+//                    artefactNode = (new FileNode(Case.getCurrentCaseThrows().getSleuthkitCase().getAbstractFileById(artefactID)));
+//                    insertedVertex = graph.insertVertex(graph.getDefaultParent(), String.valueOf(artefactID), vertexName, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+//                    graph.getModel().endUpdate();
+//                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+//                    ((mxCell) insertedVertex).setValue(vertex);
+//                } else {
+//                    graph.getModel().beginUpdate();
+//                    insertedVertex = graph.insertVertex(graph.getDefaultParent(), "", vertexName, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+//                    graph.getModel().endUpdate();
+//                    ((mxCell) insertedVertex).setValue(vertex);
+//                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+//                }
                 return true;
             } catch (UnsupportedFlavorException | IOException ex) {
                 System.out.println("importData Exception");

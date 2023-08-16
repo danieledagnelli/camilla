@@ -132,10 +132,16 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
     private final String title;
     private final Map<String, ETableColumn> columnMap;
     private final Map<Integer, Node.Property<?>> propertiesMap;
-    private final Outline outline;
+    private static Outline outline;
     private final TableListener outlineViewListener;
     private final IconRendererTableListener iconRendererListener;
     private Node rootNode;
+
+    public static Outline getOutline() {
+        return outline;
+    }
+    
+    
 
     /**
      * Multiple nodes may have been visited in the context of this
