@@ -46,4 +46,8 @@ public class CamillaVertex implements Serializable {
 //
     }
 
+    public boolean getValue() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
 }

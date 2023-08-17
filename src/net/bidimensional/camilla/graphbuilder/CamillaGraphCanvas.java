@@ -38,7 +38,11 @@ import net.bidimensional.camilla.CamillaVertex;
 import net.bidimensional.camilla.VisualizationType;
 import org.openide.nodes.Node;
 import org.sleuthkit.autopsy.corecomponents.TableFilterNode;
+import org.sleuthkit.autopsy.datamodel.FileNode;
 import org.sleuthkit.datamodel.AbstractContent;
+import org.sleuthkit.datamodel.AnalysisResult;
+import org.sleuthkit.datamodel.BlackboardArtifact;
+import org.sleuthkit.datamodel.DataArtifact;
 
 public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 
@@ -75,6 +79,8 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 //                }
             };
             CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+            CamillaUtils.loadVisualization(VisualizationType.ENTITY);
+
         }
         graph.setCellsMovable(true);
         parent = graph.getDefaultParent();
@@ -96,6 +102,9 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 if (cellObject instanceof mxCell) {
                     mxCell cell = (mxCell) cellObject;
                     handleVertexSelection(cell);
+                    System.out.println("Cell: " + cell);
+
+//                    System.out.println("Selected Vertex: " + selectedVertex.getNode().getDisplayName());
                     if (cell.isVertex()) {
 //                        System.out.println("Click: " + ((TableFilterNode) (selectedVertex.getNode())).getDisplayName());
 
@@ -140,6 +149,8 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                                 graph.getModel().endUpdate();
 
                                 CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+                                CamillaUtils.loadVisualization(VisualizationType.ENTITY);
+
                             }
                         });
 
@@ -160,6 +171,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 //                                    graphComponent.getGraph().removeCells(new Object[]{cell});
                                     deleteSelectedItems();
                                     CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+                                    CamillaUtils.loadVisualization(VisualizationType.ENTITY);
 
                                 }
                             }
@@ -231,6 +243,10 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
         if (cellObject instanceof mxCell) {
             mxCell cell = (mxCell) cellObject;
             Object userObject = cell.getValue();
+            System.out.println("------------------------------------------------");
+            System.out.println("userobject Type: " + userObject.getClass().toString());
+            System.out.println("User Object: " + userObject);
+            System.out.println("userObject instanceof CamillaVertex: " + (userObject instanceof CamillaVertex));
             if (userObject instanceof CamillaVertex) {
                 selectedVertex = (CamillaVertex) userObject;
             }
@@ -263,8 +279,8 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 super.setDragImage(img);
 
                 AbstractContent ac;
+                DataArtifact da;
                 long artefactID = -1;
-                Node artefactNode;
                 CamillaVertex vertex = new CamillaVertex(node);
                 Object insertedVertex;
                 String vertexName = vertex.getNode().getDisplayName(); // should be vertex.displayname
@@ -275,18 +291,23 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                     artefactID = ac.getId();
 
                 }
-                graph.getModel().beginUpdate();
+                if (node.getLookup().lookup(Object.class) instanceof DataArtifact) {
+                    da = (DataArtifact) node.getLookup().lookup(Object.class);
+                    artefactID = da.getId();
+                    System.out.println("DA ID:" + artefactID);
+                }
                 String artefactIDstring = null;
 
                 if (artefactID != -1L) {
                     artefactIDstring = String.valueOf(artefactID);
                 }
-
+                System.out.println("Artefact ID: " + artefactIDstring);
+                graph.getModel().beginUpdate();
                 insertedVertex = graph.insertVertex(graph.getDefaultParent(), artefactIDstring, vertexName, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
-                graph.getModel().endUpdate();             
+                graph.getModel().endUpdate();
                 CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-                ((mxCell) insertedVertex).setValue(vertex);
-
+//                ((mxCell) insertedVertex).setValue(vertex);
+                CamillaUtils.loadVisualization(VisualizationType.ENTITY);
 //                if (node.getLookup().lookup(Object.class) instanceof AbstractContent) {
 //                    ac = (AbstractContent) node.getLookup().lookup(Object.class);
 //                    artefactID = ac.getId();

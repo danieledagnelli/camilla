@@ -28,6 +28,8 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.autopsy.casemodule.NoCurrentCaseException;
+import org.sleuthkit.autopsy.datamodel.FileNode;
+import org.sleuthkit.datamodel.TskCoreException;
 import org.w3c.dom.Document;
 
 @SuppressWarnings("StaticNonFinalUsedInInitialization")
@@ -142,6 +144,16 @@ public class CamillaUtils {
 
 //TODO: maintain the history of saves in the DB
     synchronized public static void saveVisualization(VisualizationType type, mxGraph graph) {
+        Object parent = graph.getDefaultParent();
+        Object[] allVertices = (Object[]) graph.getChildVertices(parent);
+        CamillaVertex cv = null;
+        for (Object c : allVertices) {
+            mxCell cell = (mxCell) c;
+            if (cell.getValue() instanceof CamillaVertex) {
+                cv = (CamillaVertex) cell.getValue();
+                cell.setValue(cv.getNode().getDisplayName());
+            }
+        }
 
         String tablename;
         if (null == type) {
@@ -161,7 +173,6 @@ public class CamillaUtils {
             }
         }
         graphXml = mxXmlUtils.getXml(codec.encode(graph.getModel()));
-//        System.out.println("Saving: " + graphXml);
         try {
             stmt.execute("INSERT OR REPLACE INTO " + tablename + "(id, XML) VALUES (1, '" + graphXml + "')");
         } catch (SQLException ex) {
@@ -232,10 +243,21 @@ public class CamillaUtils {
                 codec.decode(document.getDocumentElement(), graph.getModel());
                 System.out.println("AFTER DECODE");
 
+//                Object parent = graph.getDefaultParent();
+//                Object[] allVertices = (Object[]) graph.getChildVertices(parent);
+//                CamillaVertex cv = null;
+//                for (Object c : allVertices) {
+//                    mxCell cell = (mxCell) c;
+//                    if (cell.getValue() != null) {
+//                        Node artefactNode = (new FileNode(Case.getCurrentCaseThrows().getSleuthkitCase().getAbstractFileById(Long.valueOf(cell.getValue().toString()))));
+//                        cell.setValue(artefactNode);
+//                    }
+//                }
                 return graph;
             }
         } catch (SQLException ex) {
             Exceptions.printStackTrace(ex);
+
         }
         return null;
     }
