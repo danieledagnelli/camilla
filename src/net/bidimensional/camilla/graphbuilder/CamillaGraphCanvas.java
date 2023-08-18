@@ -33,16 +33,20 @@ import javax.swing.TransferHandler;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import net.bidimensional.camilla.CamillaCanvas;
+import net.bidimensional.camilla.CamillaNode;
 import net.bidimensional.camilla.CamillaUtils;
 import net.bidimensional.camilla.CamillaVertex;
 import net.bidimensional.camilla.VisualizationType;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
+import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.autopsy.corecomponents.TableFilterNode;
 import org.sleuthkit.autopsy.datamodel.FileNode;
 import org.sleuthkit.datamodel.AbstractContent;
 import org.sleuthkit.datamodel.AnalysisResult;
 import org.sleuthkit.datamodel.BlackboardArtifact;
 import org.sleuthkit.datamodel.DataArtifact;
+import org.sleuthkit.datamodel.TskCoreException;
 
 public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 
@@ -78,8 +82,8 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 //                    return true;
 //                }
             };
-            CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-            CamillaUtils.loadVisualization(VisualizationType.ENTITY);
+            graph = (CamillaEntityGraph) CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+//            CamillaUtils.loadVisualization(VisualizationType.ENTITY);
 
         }
         graph.setCellsMovable(true);
@@ -118,7 +122,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
             @Override
             public void invoke(Object sender, mxEventObject evt) {
 
-                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+                graph = (CamillaEntityGraph) CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
 
             }
         });
@@ -146,11 +150,10 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                             public void actionPerformed(ActionEvent ae) {
                                 graph.getModel().beginUpdate();
                                 graph.insertVertex(parent, null, "", e.getX(), e.getY(), 80, 30, "shape=rectangle;strokeColor=black;fillColor=white;");
+
+                                graph = (CamillaEntityGraph) CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+//                                CamillaUtils.loadVisualization(VisualizationType.ENTITY);
                                 graph.getModel().endUpdate();
-
-                                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-                                CamillaUtils.loadVisualization(VisualizationType.ENTITY);
-
                             }
                         });
 
@@ -170,8 +173,8 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                                 if (result == JOptionPane.YES_OPTION) {
 //                                    graphComponent.getGraph().removeCells(new Object[]{cell});
                                     deleteSelectedItems();
-                                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-                                    CamillaUtils.loadVisualization(VisualizationType.ENTITY);
+                                    graph = (CamillaEntityGraph )CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+//                                    CamillaUtils.loadVisualization(VisualizationType.ENTITY);
 
                                 }
                             }
@@ -247,8 +250,9 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
             System.out.println("userobject Type: " + userObject.getClass().toString());
             System.out.println("User Object: " + userObject);
             System.out.println("userObject instanceof CamillaVertex: " + (userObject instanceof CamillaVertex));
-            if (userObject instanceof CamillaVertex) {
-                selectedVertex = (CamillaVertex) userObject;
+            if (userObject instanceof BlackboardArtifact) {
+                BlackboardArtifact bba = (BlackboardArtifact) userObject;
+                selectedVertex = new CamillaVertex(new CamillaNode(bba));
             }
         }
     }
@@ -286,16 +290,13 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 String vertexName = vertex.getNode().getDisplayName(); // should be vertex.displayname
                 String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
                 setSelectedVertex(vertex);
-                if (node.getLookup().lookup(Object.class) instanceof AbstractContent) {
-                    ac = (AbstractContent) node.getLookup().lookup(Object.class);
-                    artefactID = ac.getId();
 
+                BlackboardArtifact bba;
+                if (node.getLookup().lookup(Object.class) instanceof BlackboardArtifact) {
+                    bba = ((BlackboardArtifact) node.getLookup().lookup(Object.class));
+                    artefactID = bba.getArtifactID();
                 }
-                if (node.getLookup().lookup(Object.class) instanceof DataArtifact) {
-                    da = (DataArtifact) node.getLookup().lookup(Object.class);
-                    artefactID = da.getId();
-                    System.out.println("DA ID:" + artefactID);
-                }
+
                 String artefactIDstring = null;
 
                 if (artefactID != -1L) {
@@ -303,26 +304,14 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 }
                 System.out.println("Artefact ID: " + artefactIDstring);
                 graph.getModel().beginUpdate();
-                insertedVertex = graph.insertVertex(graph.getDefaultParent(), artefactIDstring, vertexName, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+                //TODO: restore ian
+//                insertedVertex = graph.insertVertex(graph.getDefaultParent(), artefactIDstring, vertexName, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+                insertedVertex = graph.insertVertex(graph.getDefaultParent(), artefactIDstring, vertex, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
+
+                graph = (CamillaEntityGraph) CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+//                CamillaUtils.loadVisualization(VisualizationType.ENTITY);
                 graph.getModel().endUpdate();
-                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-//                ((mxCell) insertedVertex).setValue(vertex);
-                CamillaUtils.loadVisualization(VisualizationType.ENTITY);
-//                if (node.getLookup().lookup(Object.class) instanceof AbstractContent) {
-//                    ac = (AbstractContent) node.getLookup().lookup(Object.class);
-//                    artefactID = ac.getId();
-//                    artefactNode = (new FileNode(Case.getCurrentCaseThrows().getSleuthkitCase().getAbstractFileById(artefactID)));
-//                    insertedVertex = graph.insertVertex(graph.getDefaultParent(), String.valueOf(artefactID), vertexName, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
-//                    graph.getModel().endUpdate();
-//                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-//                    ((mxCell) insertedVertex).setValue(vertex);
-//                } else {
-//                    graph.getModel().beginUpdate();
-//                    insertedVertex = graph.insertVertex(graph.getDefaultParent(), "", vertexName, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
-//                    graph.getModel().endUpdate();
-//                    ((mxCell) insertedVertex).setValue(vertex);
-//                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-//                }
+                graph.refresh();
                 return true;
             } catch (UnsupportedFlavorException | IOException ex) {
                 System.out.println("importData Exception");

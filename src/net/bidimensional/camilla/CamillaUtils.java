@@ -29,6 +29,7 @@ import org.openide.util.Exceptions;
 import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.autopsy.casemodule.NoCurrentCaseException;
 import org.sleuthkit.autopsy.datamodel.FileNode;
+import org.sleuthkit.datamodel.BlackboardArtifact;
 import org.sleuthkit.datamodel.TskCoreException;
 import org.w3c.dom.Document;
 
@@ -143,15 +144,20 @@ public class CamillaUtils {
     }
 
 //TODO: maintain the history of saves in the DB
-    synchronized public static void saveVisualization(VisualizationType type, mxGraph graph) {
+    synchronized public static mxGraph saveVisualization(VisualizationType type, mxGraph graph) {
         Object parent = graph.getDefaultParent();
         Object[] allVertices = (Object[]) graph.getChildVertices(parent);
-        CamillaVertex cv = null;
+        CamillaVertex cv;
         for (Object c : allVertices) {
+
             mxCell cell = (mxCell) c;
+            System.out.println("cell value SAVE: " + cell.getValue().toString() + " - Cell ID:" + cell.getId());
+
+//            String nodeID = cell.getId();
             if (cell.getValue() instanceof CamillaVertex) {
                 cv = (CamillaVertex) cell.getValue();
-                cell.setValue(cv.getNode().getDisplayName());
+                String nodeName = cv.getNode().getDisplayName();
+                cell.setValue(nodeName);
             }
         }
 
@@ -178,6 +184,7 @@ public class CamillaUtils {
         } catch (SQLException ex) {
             Exceptions.printStackTrace(ex);
         }
+        return loadVisualization(type);
 
     }
 
@@ -239,25 +246,38 @@ public class CamillaUtils {
                         graph = new CamillaTimelineGraph();
                         break;
                 }
-                System.out.println("BEFORE DECODE");
+//                System.out.println("BEFORE DECODE");
                 codec.decode(document.getDocumentElement(), graph.getModel());
-                System.out.println("AFTER DECODE");
+//                System.out.println("AFTER DECODE");
 
-//                Object parent = graph.getDefaultParent();
-//                Object[] allVertices = (Object[]) graph.getChildVertices(parent);
-//                CamillaVertex cv = null;
-//                for (Object c : allVertices) {
-//                    mxCell cell = (mxCell) c;
-//                    if (cell.getValue() != null) {
-//                        Node artefactNode = (new FileNode(Case.getCurrentCaseThrows().getSleuthkitCase().getAbstractFileById(Long.valueOf(cell.getValue().toString()))));
-//                        cell.setValue(artefactNode);
-//                    }
-//                }
+                Object parent = graph.getDefaultParent();
+                Object[] allVertices = (Object[]) graph.getChildVertices(parent);
+                for (Object c : allVertices) {
+                    mxCell cell = (mxCell) c;
+//                    System.out.println("cell value Load: " + cell.getValue().toString() + " - Cell ID:" + cell.getId());
+
+                    long artefactID = Long.parseLong(cell.getId());
+                    BlackboardArtifact bba;
+
+                    try {
+                        bba = Case.getCurrentCaseThrows().getSleuthkitCase().getBlackboardArtifact(artefactID);
+
+                        if (bba instanceof BlackboardArtifact) {
+                            cell.setValue(new CamillaVertex(new CamillaNode(bba)));
+                        }
+                    } catch (TskCoreException ex) {
+                        System.out.println("it's ok, " + cell.getValue() + " was not a real artifacts");
+                    }
+
+                }
+
                 return graph;
             }
         } catch (SQLException ex) {
             Exceptions.printStackTrace(ex);
 
+        } catch (NoCurrentCaseException ex) {
+            Exceptions.printStackTrace(ex);
         }
         return null;
     }
