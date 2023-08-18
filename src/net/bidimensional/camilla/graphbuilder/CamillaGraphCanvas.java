@@ -82,7 +82,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 //                    return true;
 //                }
             };
-            graph = (CamillaEntityGraph) CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+            CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
 //            CamillaUtils.loadVisualization(VisualizationType.ENTITY);
 
         }
@@ -122,7 +122,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
             @Override
             public void invoke(Object sender, mxEventObject evt) {
 
-                graph = (CamillaEntityGraph) CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
 
             }
         });
@@ -150,10 +150,9 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                             public void actionPerformed(ActionEvent ae) {
                                 graph.getModel().beginUpdate();
                                 graph.insertVertex(parent, null, "", e.getX(), e.getY(), 80, 30, "shape=rectangle;strokeColor=black;fillColor=white;");
-
-                                graph = (CamillaEntityGraph) CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-//                                CamillaUtils.loadVisualization(VisualizationType.ENTITY);
                                 graph.getModel().endUpdate();
+                                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+
                             }
                         });
 
@@ -173,7 +172,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                                 if (result == JOptionPane.YES_OPTION) {
 //                                    graphComponent.getGraph().removeCells(new Object[]{cell});
                                     deleteSelectedItems();
-                                    graph = (CamillaEntityGraph )CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+                                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
 //                                    CamillaUtils.loadVisualization(VisualizationType.ENTITY);
 
                                 }
@@ -308,7 +307,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 //                insertedVertex = graph.insertVertex(graph.getDefaultParent(), artefactIDstring, vertexName, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
                 insertedVertex = graph.insertVertex(graph.getDefaultParent(), artefactIDstring, vertex, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
 
-                graph = (CamillaEntityGraph) CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
 //                CamillaUtils.loadVisualization(VisualizationType.ENTITY);
                 graph.getModel().endUpdate();
                 graph.refresh();

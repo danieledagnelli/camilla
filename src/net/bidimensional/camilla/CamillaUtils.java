@@ -144,7 +144,7 @@ public class CamillaUtils {
     }
 
 //TODO: maintain the history of saves in the DB
-    synchronized public static mxGraph saveVisualization(VisualizationType type, mxGraph graph) {
+    synchronized public static void saveVisualization(VisualizationType type, mxGraph graph) {
         Object parent = graph.getDefaultParent();
         Object[] allVertices = (Object[]) graph.getChildVertices(parent);
         CamillaVertex cv;
@@ -184,8 +184,7 @@ public class CamillaUtils {
         } catch (SQLException ex) {
             Exceptions.printStackTrace(ex);
         }
-        return loadVisualization(type);
-
+        
     }
 
     public static mxCell getCellByName(mxGraph graph, String name) {
