@@ -19,6 +19,7 @@ public class CamillaOutlineView extends OutlineView {
     class CamillaTransferHandler extends TransferHandler {
 
         @Override
+        // Implement the ability to transfer data on Drag and Drop
         protected Transferable createTransferable(JComponent c) {
             if (c instanceof Outline) {
                 Outline outline = (Outline) c;

@@ -64,6 +64,7 @@ import javax.swing.table.TableColumnModel;
 import net.bidimensional.camilla.CamillaOutlineView;
 import net.bidimensional.camilla.CamillaUtils;
 import net.bidimensional.camilla.ResultViewerPersistence;
+import net.bidimensional.camilla.VisualizationType;
 import org.netbeans.swing.etable.ETableColumn;
 import org.netbeans.swing.etable.ETableColumnModel;
 import org.netbeans.swing.outline.DefaultOutlineCellRenderer;
@@ -140,8 +141,6 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
     public static Outline getOutline() {
         return outline;
     }
-    
-    
 
     /**
      * Multiple nodes may have been visited in the context of this
@@ -199,9 +198,8 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
         this.columnMap = new HashMap<>();
         this.propertiesMap = new TreeMap<>();
 
-        this.graph = new mxGraph();
-        this.parent = graph.getDefaultParent();
-
+//        this.graph = new mxGraph();
+//        this.parent = graph.getDefaultParent();
         initComponents();
 
         canvasPanel.revalidate();
@@ -1388,6 +1386,7 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
         gotoPageLabel = new javax.swing.JLabel();
         gotoPageTextField = new javax.swing.JTextField();
         exportPNGButton = new javax.swing.JButton();
+        saveGraphButton = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
         jSplitPane1.setEnabled(true); // Ensure that the split pane is enabled
         jSplitPane1.setDividerSize(10); // Set the divider size to 10 pixels (or any value that suits your design)
@@ -1442,13 +1441,13 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
         });
 
         // Load the original image
-        ImageIcon originalIcon = new ImageIcon(getClass().getResource("download-flat.png"));
+        ImageIcon originalIconDownload = new ImageIcon(getClass().getResource("download-flat.png"));
 // Create a new image scaled to 16x16 pixels
-        Image scaledImage = originalIcon.getImage().getScaledInstance(24, 24, Image.SCALE_DEFAULT);
+        Image scaledImageDownload = originalIconDownload.getImage().getScaledInstance(24, 24, Image.SCALE_DEFAULT);
 // Create a new ImageIcon from the scaled image
-        ImageIcon buttonIcon = new ImageIcon(scaledImage);
+        ImageIcon buttonIconDownload = new ImageIcon(scaledImageDownload);
 // Set the icon of the button and the tooltip text
-        exportPNGButton.setIcon(buttonIcon);
+        exportPNGButton.setIcon(buttonIconDownload);
         exportPNGButton.setText(""); // remove the existing text
         exportPNGButton.setToolTipText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "CamillaViewerTable.exportPNGButton.text"));
         exportPNGButton.addActionListener(new java.awt.event.ActionListener() {
@@ -1456,6 +1455,29 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
                 CamillaUtils.saveGraphToPNG(canvasPanel);
             }
         });
+
+        // Load the original image
+        ImageIcon originalIconSave = new ImageIcon(getClass().getResource("save.png"));
+// Create a new image scaled to 16x16 pixels
+        Image scaledImageSave = originalIconSave.getImage().getScaledInstance(24, 24, Image.SCALE_DEFAULT);
+// Create a new ImageIcon from the scaled image
+        ImageIcon buttonIconSave = new ImageIcon(scaledImageSave);
+// Set the icon of the button and the tooltip text
+        saveGraphButton.setIcon(buttonIconSave);
+        saveGraphButton.setText(""); // remove the existing text
+        saveGraphButton.setToolTipText(org.openide.util.NbBundle.getMessage(CamillaGraphBuilder.class, "CamillaViewerTable.saveGraphButton.text"));
+        saveGraphButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+// Display a confirmation dialog
+                int response = JOptionPane.showConfirmDialog(null, "If you Save the Graph the nodes will lose their reference to the artifact, do you want to continue?", "Confirm Save", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+                // Check if the user clicked the "Yes" button
+                if (response == JOptionPane.YES_OPTION) {
+                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, CamillaGraphCanvas.getGraph());
+                }
+            }
+        });
+        saveGraphButton.setVisible(true);
 
         //TODO: Implement Clear Graph (and Timeline) button
         outlineView.addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -1502,8 +1524,11 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
                                                 .addComponent(gotoPageLabel)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(gotoPageTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                // This gap will push the following components to the right
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(exportPNGButton))
+                                                .addComponent(exportPNGButton)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(saveGraphButton))
                                         .addComponent(jSplitPane1)))
         );
 
@@ -1521,7 +1546,9 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
                                         .addComponent(pageNextButton, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(gotoPageLabel)
                                         .addComponent(gotoPageTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(exportPNGButton))
+                                        .addComponent(exportPNGButton)
+                                        .addComponent(saveGraphButton)
+                                )
                                 .addGap(3, 3, 3)
                                 .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
                                 .addContainerGap())
@@ -1554,17 +1581,14 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
             MessageNotifyUtil.Message.info(Bundle.Camilla_exportCSVButtonActionPerformed_empty());
         }
     }
-    
-    
 
+    // Not implemented
     private void outlineViewComponentResized(java.awt.event.ComponentEvent evt) {
-        // TODO add your handling code here:
-//        int dividerLocation = (int) (jSplitPane1.getWidth() * 0.3);
-//        // set the divider location
-//        jSplitPane1.setDividerLocation(dividerLocation);
+
     }
     private javax.swing.JPanel canvasPanel;
     private javax.swing.JButton exportPNGButton;
+    private javax.swing.JButton saveGraphButton;
     private javax.swing.JLabel gotoPageLabel;
     private javax.swing.JTextField gotoPageTextField;
     private javax.swing.JSplitPane jSplitPane1;

@@ -5,8 +5,7 @@
         <group>
             <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/graphbuilder/CamillaGraphCanvas.java</file>
             <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaUtils.java</file>
-            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/graphbuilder/CamillaGraphBuilder.java</file>
-            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaOutlineView.java</file>
+            <file>file:/C:/camilla-plugin-git/Camilla/src/net/bidimensional/camilla/CamillaCanvas.java</file>
         </group>
     </open-files>
 </project-private>

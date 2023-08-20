@@ -19,6 +19,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedList;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -47,7 +48,6 @@ public class CamillaUtils {
     private static String url;
     private static Connection conn;
     private static mxGraph graph;
-//    private static CamillaTimelineGraph timelineGraph;
 
     private static Statement stmt;
 
@@ -74,6 +74,10 @@ public class CamillaUtils {
 
     }
 
+    /*
+    This can be improved, it currently saves a temporary file for each image to be used on the Canvas so that it can be rendered there.
+    The improvement is to save one temporary icon for each Artefact type
+     */
     public static String saveImageToTempFile(Node n) {
         String imageClass;
         BufferedImage outputImage;
@@ -84,6 +88,7 @@ public class CamillaUtils {
             outputImage = (BufferedImage) n.getOpenedIcon(BeanInfo.ICON_COLOR_32x32);
             tempFile = File.createTempFile(imageClass, ".png");
             ImageIO.write(outputImage, "png", tempFile);
+
             // Return the path of the temporary file
             return tempFile.getAbsolutePath();
         } catch (IOException ex) {
@@ -93,18 +98,21 @@ public class CamillaUtils {
 
     }
 
-    //TODO: return the previous version of the graph stored in the db
+    //NOT IMPLEMENTED: Returns the previous version of the graph stored in the db. To be implemented it needs to maintain a history of the xml graph in the database at every change.
     public static mxGraph undoChanges(VisualizationType type) {
-        return null;
+        throw new UnsupportedOperationException("Not Implemented");
     }
 
+    /*
+    Export the canvas passed as input on the filesystem. 
+     */
     public static void saveGraphToPNG(JPanel canvas) {
         mxGraphComponent graphComponent = ((CamillaCanvas) canvas).getGraphComponent();
 
         // Create a BufferedImage of the graph
         BufferedImage originalImage = mxCellRenderer.createBufferedImage(graphComponent.getGraph(), null, 1, Color.WHITE, true, null);
 
-        // Create a new image with padding
+        // Create a new image with padding otherwise the image will be cropped exactly at the node image end, which doesn't look great
         int padding = 50;
         BufferedImage imageWithPadding = new BufferedImage(originalImage.getWidth() + 2 * padding, originalImage.getHeight() + 2 * padding, originalImage.getType());
         Graphics2D g = imageWithPadding.createGraphics();
@@ -146,14 +154,17 @@ public class CamillaUtils {
         }
     }
 
-//TODO: maintain the history of saves in the DB
-    synchronized public static void saveVisualization(VisualizationType type, mxGraph graph) {
+    /*
+    Save the graph passed as input as part of the case. Send the visualization type as parameter, this is for future use in case there are multiple visualizations available.
+    TODO: implement maintaining the history of changes.
+     */
+    synchronized public static void saveVisualization(VisualizationType type, mxGraph graph)  {
         Object parent = graph.getDefaultParent();
         Object[] allVertices = (Object[]) graph.getChildVertices(parent);
+
         CamillaVertex cv;
         for (Object c : allVertices) {
             mxCell cell = (mxCell) c;
-
             // Save only the name of the artifact when saving to XML
             if (cell.getValue() instanceof CamillaVertex) {
                 cv = (CamillaVertex) cell.getValue();
@@ -188,28 +199,11 @@ public class CamillaUtils {
 
     }
 
-    public static mxCell getCellByName(mxGraph graph, String name) {
-        Object parent = graph.getDefaultParent();
-        int childCount = graph.getModel().getChildCount(parent);
 
-        for (int i = 0; i < childCount; i++) {
-            Object childCell = graph.getModel().getChildAt(parent, i);
-
-            if (childCell instanceof mxCell) {
-                mxCell cell = (mxCell) childCell;
-
-                if (name.equals(cell.getId())) {
-                    return cell;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    
-
-    //TODO: load the latest saved visualization
+    /*
+    Load the visualization saved as part of the case. Pass the type of visualization as parameter.
+    TODO: Once implemented history, return the latest save.
+     */
     synchronized public static CamillaEntityGraph loadVisualization(VisualizationType type) {
         String tablename;
         if (null == type) {
@@ -244,9 +238,6 @@ public class CamillaUtils {
                     case ENTITY:
                         graph = new CamillaEntityGraph();
                         break;
-//                    case TIMELINE:
-//                        graph = new CamillaTimelineGraph();
-//                        break;
                 }
                 codec.decode(document.getDocumentElement(), graph.getModel());
 
@@ -268,19 +259,16 @@ public class CamillaUtils {
                     }
 
                 }
-                
+
 //                for (Object c : allVertices) {
 //                    mxCell cell = (mxCell) c;
 ////                    System.out.println(cell.getValue().getClass().getTypeName());
 //                }
-
                 return (CamillaEntityGraph) graph;
             }
-        } catch (SQLException ex) {
+        } catch (SQLException | NoCurrentCaseException ex) {
             Exceptions.printStackTrace(ex);
 
-        } catch (NoCurrentCaseException ex) {
-            Exceptions.printStackTrace(ex);
         }
         return null;
     }

@@ -32,40 +32,26 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
-import javax.swing.tree.TreeModel;
 import net.bidimensional.camilla.CamillaCanvas;
 import net.bidimensional.camilla.CamillaNode;
 import net.bidimensional.camilla.CamillaUtils;
 import net.bidimensional.camilla.CamillaVertex;
-import net.bidimensional.camilla.NodeArtefactRegistry;
 import net.bidimensional.camilla.VisualizationType;
-import org.netbeans.swing.outline.DefaultOutlineModel;
-import org.netbeans.swing.outline.Outline;
-import org.netbeans.swing.outline.OutlineModel;
 import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.autopsy.casemodule.NoCurrentCaseException;
-import org.sleuthkit.autopsy.casemodule.services.Blackboard;
 import org.sleuthkit.autopsy.corecomponents.TableFilterNode;
-import org.sleuthkit.autopsy.datamodel.FileNode;
-import org.sleuthkit.datamodel.AbstractContent;
-import org.sleuthkit.datamodel.AnalysisResult;
 import org.sleuthkit.datamodel.BlackboardArtifact;
-import org.sleuthkit.datamodel.BlackboardAttribute;
-import org.sleuthkit.datamodel.BlackboardAttribute.ATTRIBUTE_TYPE;
-import org.sleuthkit.datamodel.DataArtifact;
-import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
 
 public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 
-    private CamillaEntityGraph graph;
+    private static CamillaEntityGraph graph;
     private Object parent;
     private mxGraphComponent graphComponent;
     private CamillaVertex selectedVertex;
 
-    public mxGraph getGraph() {
+    public static mxGraph getGraph() {
         return graph;
     }
 
@@ -80,20 +66,8 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
         graph = (CamillaEntityGraph) CamillaUtils.loadVisualization(VisualizationType.ENTITY);
         if (graph == null) {
             graph = new CamillaEntityGraph(new mxGraphModel()) {
-//                @Override
-//                public boolean isCellMovable(Object cell) {
-//                    if (cell instanceof mxCell) {
-//                        mxCell mxCell = (mxCell) cell;
-//                        // Add your conditions here based on the mxCell object
-//                        // For example, to make a specific vertex immovable, you could do:
-//                        // if (mxCell.getValue().equals("My Vertex")) return false;
-//                    }
-////                return super.isCellMovable(cell);
-//                    return true;
-//                }
+
             };
-            CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-//            CamillaUtils.loadVisualization(VisualizationType.ENTITY);
 
         }
         graph.setCellsMovable(true);
@@ -115,14 +89,16 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 Object cellObject = graphComponent.getCellAt(e.getX(), e.getY());
                 if (cellObject instanceof mxCell) {
                     mxCell cell = (mxCell) cellObject;
+                    System.out.println("Cell on Mouse Release: " + cell.getValue());
+
                     handleVertexSelection(cell);
-                    System.out.println("Cell: " + cell);
+//                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, CamillaGraphCanvas.getGraph());
 
-//                    System.out.println("Selected Vertex: " + selectedVertex.getNode().getDisplayName());
-                    if (cell.isVertex()) {
-//                        System.out.println("Click: " + ((TableFilterNode) (selectedVertex.getNode())).getDisplayName());
-
-                    }
+////                    System.out.println("Selected Vertex: " + selectedVertex.getNode().getDisplayName());
+//                    if (cell.isVertex()) {
+////                        System.out.println("Click: " + ((TableFilterNode) (selectedVertex.getNode())).getDisplayName());
+//
+//                    }
                 }
             }
         });
@@ -132,8 +108,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
             @Override
             public void invoke(Object sender, mxEventObject evt) {
 
-                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-
+//                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
             }
         });
         graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
@@ -161,7 +136,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                                 graph.getModel().beginUpdate();
                                 graph.insertVertex(parent, null, "", e.getX(), e.getY(), 80, 30, "shape=rectangle;strokeColor=black;fillColor=white;");
                                 graph.getModel().endUpdate();
-                                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+//                                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
 
                             }
                         });
@@ -182,7 +157,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                                 if (result == JOptionPane.YES_OPTION) {
 //                                    graphComponent.getGraph().removeCells(new Object[]{cell});
                                     deleteSelectedItems();
-                                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+//                                    CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
 //                                    CamillaUtils.loadVisualization(VisualizationType.ENTITY);
 
                                 }
@@ -199,6 +174,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                                 showMenu.removeAll();
 
                                 if (selectedVertex != null) {
+                                    System.out.println("selected vertex actions: " + selectedVertex.getNode().getActions(true).length);
                                     System.out.println("selectedVertex is not null"); // Debugging
                                     JPopupMenu contextMenu = selectedVertex.getNode().getContextMenu();
                                     int count = contextMenu.getComponentCount();
@@ -228,7 +204,11 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
 //                                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
                             }
                         });
-                        menu.add(showMenu);
+
+                        if (!(((mxCell) cell).getValue() instanceof String)) {
+                            menu.add(showMenu);
+
+                        }
 
                     }
 
@@ -255,15 +235,21 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
         if (cellObject instanceof mxCell) {
             mxCell cell = (mxCell) cellObject;
             Object userObject = cell.getValue();
-            System.out.println("------------------------------------------------");
+            System.out.println("---BEGIN---handleVertexSelection------------------------------------------------");
             System.out.println("userobject Type: " + userObject.getClass().toString());
             System.out.println("User Object: " + userObject);
             System.out.println("userObject instanceof CamillaVertex: " + (userObject instanceof CamillaVertex));
-            if (userObject instanceof BlackboardArtifact) {
-                BlackboardArtifact bba = (BlackboardArtifact) userObject;
-                selectedVertex = new CamillaVertex(new CamillaNode(bba));
+            System.out.println("---END---handleVertexSelection------------------------------------------------");
+            try {
+                selectedVertex = (CamillaVertex) (userObject);
+                System.out.println("handleVertexSelection Selected Vertex: " + selectedVertex.getNode().getDisplayName());
+
+            } catch (ClassCastException | NullPointerException e) {
+                System.out.println("handleVertexSelection: probably a string - " + e.toString());
+
             }
         }
+
     }
 
     //This custom handler is disabled within the canvas to allow the jgraph drag and drop
@@ -311,23 +297,18 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 String vertexName = vertex.getNode().getDisplayName(); // should be vertex.displayname
                 String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
                 setSelectedVertex(vertex);
-
+                long objID;
                 BlackboardArtifact bba;
+
+                // Not all elements in the outline are artefacts, some of them are Autopsy groupings.
+                // This logic allows to get the id only for real investigation artefacts
                 if (node.getLookup().lookup(Object.class) instanceof BlackboardArtifact) {
                     bba = ((BlackboardArtifact) node.getLookup().lookup(Object.class));
                     artefactID = bba.getArtifactID();
-
-//                    System.out.println("Artefact (from Node): " + bba.getDisplayName());
-//                    System.out.println("Aretfact ID (from Node): " + artefactID);
-//
-//                    System.out.println("Artefact (from Case): " + Case.getCurrentCaseThrows().getSleuthkitCase().getBlackboardArtifact(artefactID));
-////                    System.out.println("ArtefactName (from Case)" + getArtifactName(bba));
-//                    printArtifactAttributes(bba);
+                    objID = Case.getCurrentCaseThrows().getSleuthkitCase().getBlackboardArtifact(artefactID).getObjectID();
                 }
 
                 String artefactIDstring = null;
-                long objID = Case.getCurrentCaseThrows().getSleuthkitCase().getBlackboardArtifact(artefactID).getObjectID();
-
                 if (artefactID != -1L) {
                     artefactIDstring = String.valueOf(artefactID);
                 }
@@ -337,13 +318,8 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 graph.getModel().endUpdate();
                 graph.refresh();
 
-                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-//                graph.getModel().beginUpdate();
-//                graph = CamillaUtils.loadVisualization(VisualizationType.ENTITY);
-//                graph.getModel().endUpdate();
-
-//                graph.refresh();
-
+//                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+                handleVertexSelection(insertedVertex);
                 return true;
             } catch (UnsupportedFlavorException | IOException | NoCurrentCaseException | TskCoreException ex) {
                 System.out.println("importData Exception");

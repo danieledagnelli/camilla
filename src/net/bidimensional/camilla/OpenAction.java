@@ -28,17 +28,17 @@ import org.sleuthkit.autopsy.coreutils.Logger;
     @ActionReference(path = "Toolbars/Case", position = 101)})
 @ActionRegistration(displayName = "#CTL_OpenAction", lazy = false)
 @NbBundle.Messages({"CTL_OpenAction=Camilla",
-    "OpenAction.stale.confDlg.msg=The image / video database may be out of date. "
-    + "Do you want to update and listen for further ingest results?\n"
-    + "Choosing 'yes' will update the database and enable listening to future ingests.\n\n"
-    + "Database update status will appear in the lower right corner of the application window.",
-    "OpenAction.notAnalyzedDlg.msg=No image/video files available to display yet.\n"
-    + "Please run FileType and EXIF ingest modules.",
+//    "OpenAction.stale.confDlg.msg=The image / video database may be out of date. "
+//    + "Do you want to update and listen for further ingest results?\n"
+//    + "Choosing 'yes' will update the database and enable listening to future ingests.\n\n"
+//    + "Database update status will appear in the lower right corner of the application window.",
+//    "OpenAction.notAnalyzedDlg.msg=No image/video files available to display yet.\n"
+//    + "Please run FileType and EXIF ingest modules.",
     "OpenAction.stale.confDlg.title=Camilla"})
 public final class OpenAction extends CallableSystemAction {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger logger = Logger.getLogger(OpenAction.class.getName());
+//    private static final Logger logger = Logger.getLogger(OpenAction.class.getName());
     private static final String VIEW_IMAGES_VIDEOS = Bundle.CTL_OpenAction();
 
     private final PropertyChangeListener pcl;
@@ -61,13 +61,6 @@ public final class OpenAction extends CallableSystemAction {
 
     @Override
     public boolean isEnabled() {
-//        Case openCase;
-//        try {
-//            openCase = Case.getCurrentCaseThrows();
-//        } catch (NoCurrentCaseException ex) {
-//            return false;
-//        }
-//        return super.isEnabled() && Installer.isJavaFxInited() && openCase.hasData();
         return true;
     }
 
@@ -100,7 +93,7 @@ public final class OpenAction extends CallableSystemAction {
     }
 
     @Override
-
+    // Show an info Dialog when clicking on Camilla icon on the toolbar
     public void performAction() {
 
         Platform.runLater(new Runnable() {
@@ -126,19 +119,12 @@ public final class OpenAction extends CallableSystemAction {
         });
 
     }
-
-    @NbBundle.Messages({"OpenAction.openTopComponent.error.message=An error occurred while attempting to open Image Gallery.",
-        "OpenAction.openTopComponent.error.title=Failed to open Image Gallery"})
-    private void openTopComponent() {
-//        SwingUtilities.invokeLater(() -> {
-//            try {
-//                ImageGalleryTopComponent.openTopComponent();
-//            } catch (TskCoreException ex) {
-//                logger.log(Level.SEVERE, "Failed to open Image Gallery top component", ex); //NON-NLS}
-//                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), Bundle.OpenAction_openTopComponent_error_message(), Bundle.OpenAction_openTopComponent_error_title(), JOptionPane.PLAIN_MESSAGE);
-//            }
-//        });
-    }
+//
+////    @NbBundle.Messages({"OpenAction.openTopComponent.error.message=An error occurred while attempting to open Image Gallery.",
+////        "OpenAction.openTopComponent.error.title=Failed to open Image Gallery"})
+//    private void openTopComponent() {
+//
+//    }
 
     @Override
     public String getName() {
