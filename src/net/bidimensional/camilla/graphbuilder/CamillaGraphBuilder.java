@@ -1554,6 +1554,8 @@ public class CamillaGraphBuilder extends AbstractDataResultViewer {
             MessageNotifyUtil.Message.info(Bundle.Camilla_exportCSVButtonActionPerformed_empty());
         }
     }
+    
+    
 
     private void outlineViewComponentResized(java.awt.event.ComponentEvent evt) {
         // TODO add your handling code here:

@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.beans.BeanInfo;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -23,7 +24,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import net.bidimensional.camilla.graphbuilder.CamillaEntityGraph;
-import net.bidimensional.camilla.timelinebuilder.CamillaTimelineGraph;
+import net.bidimensional.camilla.graphbuilder.CamillaGraphBuilder;
+import org.netbeans.swing.outline.Outline;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.sleuthkit.autopsy.casemodule.Case;
@@ -32,6 +34,7 @@ import org.sleuthkit.autopsy.datamodel.FileNode;
 import org.sleuthkit.datamodel.BlackboardArtifact;
 import org.sleuthkit.datamodel.TskCoreException;
 import org.w3c.dom.Document;
+import org.openide.explorer.view.Visualizer;
 
 @SuppressWarnings("StaticNonFinalUsedInInitialization")
 public class CamillaUtils {
@@ -44,7 +47,7 @@ public class CamillaUtils {
     private static String url;
     private static Connection conn;
     private static mxGraph graph;
-    private static CamillaTimelineGraph timelineGraph;
+//    private static CamillaTimelineGraph timelineGraph;
 
     private static Statement stmt;
 
@@ -149,11 +152,9 @@ public class CamillaUtils {
         Object[] allVertices = (Object[]) graph.getChildVertices(parent);
         CamillaVertex cv;
         for (Object c : allVertices) {
-
             mxCell cell = (mxCell) c;
-            System.out.println("cell value SAVE: " + cell.getValue().toString() + " - Cell ID:" + cell.getId());
 
-//            String nodeID = cell.getId();
+            // Save only the name of the artifact when saving to XML
             if (cell.getValue() instanceof CamillaVertex) {
                 cv = (CamillaVertex) cell.getValue();
                 String nodeName = cv.getNode().getDisplayName();
@@ -184,7 +185,7 @@ public class CamillaUtils {
         } catch (SQLException ex) {
             Exceptions.printStackTrace(ex);
         }
-        
+
     }
 
     public static mxCell getCellByName(mxGraph graph, String name) {
@@ -206,8 +207,10 @@ public class CamillaUtils {
         return null;
     }
 
+    
+
     //TODO: load the latest saved visualization
-    public static mxGraph loadVisualization(VisualizationType type) {
+    synchronized public static CamillaEntityGraph loadVisualization(VisualizationType type) {
         String tablename;
         if (null == type) {
             // throw an exception or handle default case
@@ -241,20 +244,16 @@ public class CamillaUtils {
                     case ENTITY:
                         graph = new CamillaEntityGraph();
                         break;
-                    case TIMELINE:
-                        graph = new CamillaTimelineGraph();
-                        break;
+//                    case TIMELINE:
+//                        graph = new CamillaTimelineGraph();
+//                        break;
                 }
-//                System.out.println("BEFORE DECODE");
                 codec.decode(document.getDocumentElement(), graph.getModel());
-//                System.out.println("AFTER DECODE");
 
                 Object parent = graph.getDefaultParent();
                 Object[] allVertices = (Object[]) graph.getChildVertices(parent);
                 for (Object c : allVertices) {
                     mxCell cell = (mxCell) c;
-//                    System.out.println("cell value Load: " + cell.getValue().toString() + " - Cell ID:" + cell.getId());
-
                     long artefactID = Long.parseLong(cell.getId());
                     BlackboardArtifact bba;
 
@@ -269,8 +268,13 @@ public class CamillaUtils {
                     }
 
                 }
+                
+//                for (Object c : allVertices) {
+//                    mxCell cell = (mxCell) c;
+////                    System.out.println(cell.getValue().getClass().getTypeName());
+//                }
 
-                return graph;
+                return (CamillaEntityGraph) graph;
             }
         } catch (SQLException ex) {
             Exceptions.printStackTrace(ex);

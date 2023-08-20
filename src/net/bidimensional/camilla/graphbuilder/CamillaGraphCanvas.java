@@ -32,20 +32,30 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.tree.TreeModel;
 import net.bidimensional.camilla.CamillaCanvas;
 import net.bidimensional.camilla.CamillaNode;
 import net.bidimensional.camilla.CamillaUtils;
 import net.bidimensional.camilla.CamillaVertex;
+import net.bidimensional.camilla.NodeArtefactRegistry;
 import net.bidimensional.camilla.VisualizationType;
+import org.netbeans.swing.outline.DefaultOutlineModel;
+import org.netbeans.swing.outline.Outline;
+import org.netbeans.swing.outline.OutlineModel;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.sleuthkit.autopsy.casemodule.Case;
+import org.sleuthkit.autopsy.casemodule.NoCurrentCaseException;
+import org.sleuthkit.autopsy.casemodule.services.Blackboard;
 import org.sleuthkit.autopsy.corecomponents.TableFilterNode;
 import org.sleuthkit.autopsy.datamodel.FileNode;
 import org.sleuthkit.datamodel.AbstractContent;
 import org.sleuthkit.datamodel.AnalysisResult;
 import org.sleuthkit.datamodel.BlackboardArtifact;
+import org.sleuthkit.datamodel.BlackboardAttribute;
+import org.sleuthkit.datamodel.BlackboardAttribute.ATTRIBUTE_TYPE;
 import org.sleuthkit.datamodel.DataArtifact;
+import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
 
 public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
@@ -266,13 +276,26 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
             return (support.isDataFlavorSupported(new DataFlavor(Node.class, "Node")) || support.isDataFlavorSupported(new DataFlavor(TableFilterNode.class, "TableFilterNode")));
         }
 
+//        public void traverseOutline(Outline outline) {
+//            OutlineModel outlineModel = (OutlineModel) outline.getModel();
+//            Object root = outlineModel.getRoot();
+//            traverseNode(outlineModel, root);
+//        }
+//
+//        private void traverseNode(OutlineModel model, Object node) {
+//            int childCount = model.getChildCount(node);
+//            for (int i = 0; i < childCount; i++) {
+//                Object child = model.getChild(node, i);
+//                traverseNode(model, child);
+//            }
+//
+//            // Do something with the node here
+//            System.out.println(node);
+//        }
         @Override
         public boolean importData(TransferHandler.TransferSupport support) {
             try {
-                // Get the Node
-//                TableFilterNode; -> this is the actual type, check here if i can enable selection
                 Node node = (Node) support.getTransferable().getTransferData(new DataFlavor(Node.class, "Node"));
-//                TableFilterNode tfnode = (TableFilterNode) support.getTransferable().getTransferData(new DataFlavor(Node.class, "Node"));
                 System.out.println("Dropped node: " + node.getDisplayName());
                 TransferHandler.DropLocation dropLocation = support.getDropLocation();
                 Point dropPoint = dropLocation.getDropPoint();
@@ -281,11 +304,10 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 BufferedImage img = ImageIO.read(imageFile);
                 super.setDragImage(img);
 
-                AbstractContent ac;
-                DataArtifact da;
                 long artefactID = -1;
                 CamillaVertex vertex = new CamillaVertex(node);
-                Object insertedVertex;
+
+                mxCell insertedVertex;
                 String vertexName = vertex.getNode().getDisplayName(); // should be vertex.displayname
                 String style = "shape=image;image=" + imageUrl + ";verticalLabelPosition=bottom;verticalAlign=top;movable=1;";
                 setSelectedVertex(vertex);
@@ -294,31 +316,85 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
                 if (node.getLookup().lookup(Object.class) instanceof BlackboardArtifact) {
                     bba = ((BlackboardArtifact) node.getLookup().lookup(Object.class));
                     artefactID = bba.getArtifactID();
+
+//                    System.out.println("Artefact (from Node): " + bba.getDisplayName());
+//                    System.out.println("Aretfact ID (from Node): " + artefactID);
+//
+//                    System.out.println("Artefact (from Case): " + Case.getCurrentCaseThrows().getSleuthkitCase().getBlackboardArtifact(artefactID));
+////                    System.out.println("ArtefactName (from Case)" + getArtifactName(bba));
+//                    printArtifactAttributes(bba);
                 }
 
                 String artefactIDstring = null;
+                long objID = Case.getCurrentCaseThrows().getSleuthkitCase().getBlackboardArtifact(artefactID).getObjectID();
 
                 if (artefactID != -1L) {
                     artefactIDstring = String.valueOf(artefactID);
                 }
-                System.out.println("Artefact ID: " + artefactIDstring);
-                graph.getModel().beginUpdate();
-                //TODO: restore ian
-//                insertedVertex = graph.insertVertex(graph.getDefaultParent(), artefactIDstring, vertexName, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
-                insertedVertex = graph.insertVertex(graph.getDefaultParent(), artefactIDstring, vertex, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
 
-                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
-//                CamillaUtils.loadVisualization(VisualizationType.ENTITY);
+                graph.getModel().beginUpdate();
+                insertedVertex = (mxCell) graph.insertVertex(graph.getDefaultParent(), artefactIDstring, vertex, dropPoint.getX(), dropPoint.getY(), 80, 30, style);
                 graph.getModel().endUpdate();
                 graph.refresh();
+
+                CamillaUtils.saveVisualization(VisualizationType.ENTITY, graph);
+//                graph.getModel().beginUpdate();
+//                graph = CamillaUtils.loadVisualization(VisualizationType.ENTITY);
+//                graph.getModel().endUpdate();
+
+//                graph.refresh();
+
                 return true;
-            } catch (UnsupportedFlavorException | IOException ex) {
+            } catch (UnsupportedFlavorException | IOException | NoCurrentCaseException | TskCoreException ex) {
                 System.out.println("importData Exception");
                 return false;
             }
         }
     }
 
+//    public void printArtifactAttributes(BlackboardArtifact artifact) {
+//        try {
+//            // Iterate over all attributes associated with the artifact
+//            for (BlackboardAttribute attribute : artifact.getAttributes()) {
+//                // Print the attribute type and its display value
+//                System.out.println(attribute.getAttributeType().getTypeName() + ": " + attribute.getDisplayString());
+//            }
+//        } catch (TskCoreException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//    public String getArtifactName(BlackboardArtifact artifact) {
+//        try {
+//            for (BlackboardAttribute attribute : artifact.getAttributes()) {
+//                // Depending on your case, you might be looking for a specific attribute type
+//                // For example, if the name is stored in the TSK_NAME attribute:
+//                if (attribute.getAttributeType().getTypeID() == ATTRIBUTE_TYPE.TSK_NAME.getTypeID()) {
+//                    return attribute.getDisplayString();
+//                }
+//            }
+//        } catch (TskCoreException e) {
+//            e.printStackTrace();
+//        }
+//        return null;  // or return a default value
+//    }
+//    public BlackboardArtifact getArtifactById(long artifactId) {
+//        try {
+//            // Obtain the current case
+//            Case currentCase = Case.getCurrentCase();
+//
+//            // Fetch the SleuthkitCase object
+//            SleuthkitCase sleuthkitCase = currentCase.getSleuthkitCase();
+//
+//            // Retrieve the artifact using its ID
+//            BlackboardArtifact artifact = sleuthkitCase.getBlackboardArtifact(artifactId);
+//
+//            return artifact;
+//        } catch (TskCoreException e) {
+//            // Handle exceptions
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
     public void deleteSelectedItems() {
         Object[] selectedCells = graph.getSelectionCells();
         if (selectedCells != null && selectedCells.length > 0) {
