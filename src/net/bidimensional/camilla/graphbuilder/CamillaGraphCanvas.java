@@ -262,22 +262,7 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
             return (support.isDataFlavorSupported(new DataFlavor(Node.class, "Node")) || support.isDataFlavorSupported(new DataFlavor(TableFilterNode.class, "TableFilterNode")));
         }
 
-//        public void traverseOutline(Outline outline) {
-//            OutlineModel outlineModel = (OutlineModel) outline.getModel();
-//            Object root = outlineModel.getRoot();
-//            traverseNode(outlineModel, root);
-//        }
-//
-//        private void traverseNode(OutlineModel model, Object node) {
-//            int childCount = model.getChildCount(node);
-//            for (int i = 0; i < childCount; i++) {
-//                Object child = model.getChild(node, i);
-//                traverseNode(model, child);
-//            }
-//
-//            // Do something with the node here
-//            System.out.println(node);
-//        }
+
         @Override
         public boolean importData(TransferHandler.TransferSupport support) {
             try {
@@ -328,49 +313,6 @@ public class CamillaGraphCanvas extends JPanel implements CamillaCanvas {
         }
     }
 
-//    public void printArtifactAttributes(BlackboardArtifact artifact) {
-//        try {
-//            // Iterate over all attributes associated with the artifact
-//            for (BlackboardAttribute attribute : artifact.getAttributes()) {
-//                // Print the attribute type and its display value
-//                System.out.println(attribute.getAttributeType().getTypeName() + ": " + attribute.getDisplayString());
-//            }
-//        } catch (TskCoreException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//    public String getArtifactName(BlackboardArtifact artifact) {
-//        try {
-//            for (BlackboardAttribute attribute : artifact.getAttributes()) {
-//                // Depending on your case, you might be looking for a specific attribute type
-//                // For example, if the name is stored in the TSK_NAME attribute:
-//                if (attribute.getAttributeType().getTypeID() == ATTRIBUTE_TYPE.TSK_NAME.getTypeID()) {
-//                    return attribute.getDisplayString();
-//                }
-//            }
-//        } catch (TskCoreException e) {
-//            e.printStackTrace();
-//        }
-//        return null;  // or return a default value
-//    }
-//    public BlackboardArtifact getArtifactById(long artifactId) {
-//        try {
-//            // Obtain the current case
-//            Case currentCase = Case.getCurrentCase();
-//
-//            // Fetch the SleuthkitCase object
-//            SleuthkitCase sleuthkitCase = currentCase.getSleuthkitCase();
-//
-//            // Retrieve the artifact using its ID
-//            BlackboardArtifact artifact = sleuthkitCase.getBlackboardArtifact(artifactId);
-//
-//            return artifact;
-//        } catch (TskCoreException e) {
-//            // Handle exceptions
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
     public void deleteSelectedItems() {
         Object[] selectedCells = graph.getSelectionCells();
         if (selectedCells != null && selectedCells.length > 0) {

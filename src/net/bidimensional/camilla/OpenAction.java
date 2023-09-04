@@ -28,12 +28,6 @@ import org.sleuthkit.autopsy.coreutils.Logger;
     @ActionReference(path = "Toolbars/Case", position = 101)})
 @ActionRegistration(displayName = "#CTL_OpenAction", lazy = false)
 @NbBundle.Messages({"CTL_OpenAction=Camilla",
-//    "OpenAction.stale.confDlg.msg=The image / video database may be out of date. "
-//    + "Do you want to update and listen for further ingest results?\n"
-//    + "Choosing 'yes' will update the database and enable listening to future ingests.\n\n"
-//    + "Database update status will appear in the lower right corner of the application window.",
-//    "OpenAction.notAnalyzedDlg.msg=No image/video files available to display yet.\n"
-//    + "Please run FileType and EXIF ingest modules.",
     "OpenAction.stale.confDlg.title=Camilla"})
 public final class OpenAction extends CallableSystemAction {
 
@@ -119,12 +113,7 @@ public final class OpenAction extends CallableSystemAction {
         });
 
     }
-//
-////    @NbBundle.Messages({"OpenAction.openTopComponent.error.message=An error occurred while attempting to open Image Gallery.",
-////        "OpenAction.openTopComponent.error.title=Failed to open Image Gallery"})
-//    private void openTopComponent() {
-//
-//    }
+
 
     @Override
     public String getName() {

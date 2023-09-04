@@ -12,30 +12,23 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.beans.BeanInfo;
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.LinkedList;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import net.bidimensional.camilla.graphbuilder.CamillaEntityGraph;
-import net.bidimensional.camilla.graphbuilder.CamillaGraphBuilder;
-import org.netbeans.swing.outline.Outline;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.autopsy.casemodule.NoCurrentCaseException;
-import org.sleuthkit.autopsy.datamodel.FileNode;
 import org.sleuthkit.datamodel.BlackboardArtifact;
 import org.sleuthkit.datamodel.TskCoreException;
 import org.w3c.dom.Document;
-import org.openide.explorer.view.Visualizer;
 
 @SuppressWarnings("StaticNonFinalUsedInInitialization")
 public class CamillaUtils {
@@ -260,10 +253,6 @@ public class CamillaUtils {
 
                 }
 
-//                for (Object c : allVertices) {
-//                    mxCell cell = (mxCell) c;
-////                    System.out.println(cell.getValue().getClass().getTypeName());
-//                }
                 return (CamillaEntityGraph) graph;
             }
         } catch (SQLException | NoCurrentCaseException ex) {
